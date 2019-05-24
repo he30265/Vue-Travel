@@ -27,12 +27,12 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
 
     // 设置首行缩进为 4
-    'indent': ['error', 4, { 'SwitchCase': 1 }],
+    // 'indent': ['error', 4, { 'SwitchCase': 1 }],
 
     // 关闭字符串必须是单引号提示
-    'quotes': 0,
+    // 'quotes': 0,
 
     // 关闭额外的分号提示
-    'semi': 0
+    // 'semi': 0
   }
 }

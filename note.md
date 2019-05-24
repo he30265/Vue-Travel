@@ -214,12 +214,23 @@ header.vue
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-3acd88da9ed41a21.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
+记得，每完成一个功能模块都要提交代码到 GitHub 远程仓库上。这几次的提交，我们都提到了 master 主分支上。在实际的大型项目开发之中，每个功能模块都会先提交到一个对应的分支上，最后，再把这些分支合并到主分支上，接下来，我们要完成首页轮播图这个组件，看一下怎么将这个组件提交到一个分支上，然后再合并到主分支 master 上。
+
 
 
 
 ### 三、首页轮播图
 
-在 header 下，有一个轮播图，这个轮播图我们用 swiper 来实现。去 GitHub 上搜一下 (vue-awesome-swiper)[https://github.com/surmon-china/vue-awesome-swiper] 这个项目，根据文档内容在我们的项目中使用 npm 安装 swiper。：
+首先在远程仓库上新建一个分支用来提交“首页轮播”这个组件，如果你用的是码云作为你的远程仓库，直接在网站上就可以新建分支，但 GitHub 没有提供新建分支的操作，我们需要通过命令来新建，例如新建一个叫 home-swiper 的分支，并切换到这个分支：
+```
+git checkout -b home-swiper
+```
+
+通过 git branch 可以查看所有分支，标星号的是当前使用的分支。
+
+![](https://upload-images.jianshu.io/upload_images/9373308-1a8dc6f912123d86.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+在 home-swiper 这个分支下，我们编写一下首页轮播这个组件，这个轮播图我们用 swiper 来实现。去 GitHub 上搜一下 (vue-awesome-swiper)[https://github.com/surmon-china/vue-awesome-swiper] 这个项目，根据文档内容在我们的项目中使用 npm 安装 swiper。：
 ```
 npm install vue-awesome-swiper --save
 ```
@@ -231,37 +242,46 @@ npm install vue-awesome-swiper --save
 // ...
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import 'swiper/dist/css/swiper.css'
-Vue.use(VueAwesomeSwiper, /* { default global options } */)
+Vue.use(VueAwesomeSwiper, /* { default global options } */);
 // ...
 ```
 
-在 pages 的 home 的 compoments 目录下新建一个 swiper.vue 组件，编写组件内容：
+在 pages 的 home 的 compoments 目录下新建一个 swiper.vue 组件，编写组件内容，例：
 
 swiper.vue
 ```
+<template>
+<swiper :options="swiperOption">
+    <swiper-slide>I'm Slide 1</swiper-slide>
+    <swiper-slide>I'm Slide 2</swiper-slide>
+    <swiper-slide>I'm Slide 3</swiper-slide>
+    <div class="swiper-pagination" slot="pagination"></div>
+</swiper>
+</template>
 
+<script>
+export default {
+    name: "HomeSwiper",
+    data () {
+        return {
+            swiperOption: {
+
+            }
+        }
+    }
+};
+</script>
 ```
 
-然后去 Home.vue 中引入并使用 HomeSwiper 这个组件
+然后去 Home.vue 中引入并使用 HomeSwiper 这个组件，此时，控制台如果没有报错，swiper 组件的轮播效果就可以实现。
+
+现在我们来完善一下 swiper 这个组件，在(去哪网手机版)[http://piao.qunar.com/touch/] 上拷贝几张轮播图片的地址，添加到组件的 data 中，在模板中通过 v-for 循环渲染出来，然后在 swiperOption 中添加几个属性，例如 loop 是否循环滚动，pagination 分页器，具体使用方法可以去 GitHub 上查看。最后还需要给这个轮播元素一个高度，如果不给高度，可能会导致一个问题，就是如果在 swiper 组件下面再添加了元素，当网络状况不好的时候，swiper 这个组件比下面的元素加载出的晚，下面元素会顶上去，swiper 组件加载出来后，下边元素又被撑下去，这样就会出现一个抖动的问题，所以需要给这个 swiper 组件外层再加一个 div，给这个 div设置一个高度。
+
+最后还需要修改一下分页器被选中时的样式，直接在 .wrapper 下写 .swiper-pagination-bullet-active，然后设置背景色，发现并没有效果，这是因为我们在 style 标签中设置了 scope，解决方法：样式穿透，在 .swiper-pagination-bullet-active 前加 “>>>” 就可以了。
+
+基本代码已完成，接下来把它提交到分支 home-swiper 上，之前已经切换到 home-swiper 分支了，可以通过 git branch 检查一下，然后正常提交就可以了
 
 
-
-
-
-
-GitHub 上新建分支，swiper发布到这个分支上
-
-添加 swiper 组件并调用
-
-swiper 组件下再加一个元素，3G 网络的时候这个元素会抖动：解决，给 swiper 外层一个 div ，加样式 overflow : hidden;width:100%;height:0;padding-bottom:31.25%。
-
-scoped
-样式穿透
-.wrapper >>> .swiper-pagination-bullet-active{background: red!important}
-
-循环显示轮播数据
-
-提交到线上仓库
 
 
 ### 四、
