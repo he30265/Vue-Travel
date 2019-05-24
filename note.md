@@ -10,16 +10,44 @@ npm install stylus-loader --save
 
 安装成功后，启动服务。
 
-接下来去项目中开始编写头部的内容，打开 pages 目录中的 home 目录，我们可以在其中再新建一个目录 components 用来存放首页所需要的组件，我们可以把首页分成很多个小的组件，最后把它拼装起来，放到 Home.vue 中。在 components 中构建一个文件 header.vue。我们把 Home.vue 中的内容复制到 header.vue 中，然后在 template 标签中简单的添加一些元素。在 script 标签中给这个组件起一个名字，例如 “HomeHeader”。最后在 style 标签中添加一些样式。stylus 已经安装好了，所以就可以用 stylus 编写一些样式了。
+接下来去项目中开始编写头部的内容，打开 pages 目录中的 home 目录，我们可以在其中再新建一个目录 components 用来存放首页所需要的组件，我们可以把首页分成很多个小的组件，最后把它拼装起来，放到 Home.vue 中。在 components 中构建一个文件 header.vue，我们把 Home.vue 中的内容复制到 header.vue 中，然后在 template 标签中简单的添加一些元素。在 script 标签中给这个组件起一个名字，例如 “HomeHeader”。最后在 style 标签中添加一些样式。stylus 已经安装好了，所以就可以用 stylus 编写一些样式了。
 
-header.vue:
+这里再补充一个知识点，就是 rem 的使用，可以看一下我的 [“移动端开发 rem 单位使用问题”](https://www.jianshu.com/p/86afe3fafd4d) 这篇文章，这个项目中我们就用 js 动态设置 html 的 font-size 的方式来使用 rem。首先在项目中 main.js 文件里通过 import 引入 rem.js ，并在 main.js 中设置设计稿的宽，此时元素的 rem 值就是 设计稿中元素 px 值/100。然后还需要修改一个地方就是之前引入的样式初始化文件 reset.css，把 body 的 font-size 设置为 .14rem，否则页面初始化的字体大小就会有问题。
+
+rem.js:
+```
+(function (doc, win) {
+    var docEl = doc.documentElement;
+    var resizeEvt =
+        "orientationchange" in window ? "orientationchange" : "resize";
+    var recalc = function () {
+        var clientWidth = docEl.clientWidth;
+        if (!clientWidth) return;
+        if (clientWidth >= 640) {
+            docEl.style.fontSize = "100px";
+        } else {
+            docEl.style.fontSize = 100 * (clientWidth / 640) + "px";
+        }
+    };
+    if (!doc.addEventListener) return;
+    win.addEventListener(resizeEvt, recalc, false);
+    doc.addEventListener("DOMContentLoaded", recalc, false);
+})(document, window);
+```
+
+接下来可以去编写 header.vue 中结构和样式了，现在为了测试，我先把一些 icon 写成文字了，后面讲了 IconFont，再做替换，例：
+
+header.vue
 ```
 <template>
 <div class="header">
     <div class="header_left">返回</div>
-    <div class="header_center">搜索</div>
-    <div class="header_right">城市</div>
-</div>
+    <div class="header_center">
+        <span></span>
+        输入城市/景点/游玩主题
+        </div>
+        <div class="header_right">城市</div>
+    </div>
 </template>
 
 <script>
@@ -30,10 +58,10 @@ export default {
 
 <style lang="stylus" scoped>
 .header {
-    background-color: #f60;
+    background-color: #02bcd5;
     overflow: hidden;
     color: #fff;
-    padding: 10px;
+    padding: 0.2rem;
 
     .header_left {
         float: left;
@@ -41,7 +69,7 @@ export default {
 
     .header_center {
         float: left;
-        margin: 0 20px;
+        margin: 0 0.2rem;
     }
 
     .header_right {
@@ -82,7 +110,7 @@ Home.vue
 
 这个时候，我们打开页面看一下，样式可以正常显示，没有问题：
 
-![](https://upload-images.jianshu.io/upload_images/9373308-3d6c2dc299312518.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](https://upload-images.jianshu.io/upload_images/9373308-ae56b7581aaeeba0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 以上只是做一个简单的测试，实际的页面效果应该要按照设计稿来还原的。
 
@@ -100,7 +128,7 @@ Home.vue
 
 #### 1、IconFont 的使用
 
-在 header.vue 中使用 IconFont，首先进入 [IconFont 官网](https://www.iconfont.cn/) 登录账号并创建一个项目，然后进入图标库，将需要的图标加入购物车，再进入购物车，将选择的图标添加到自己的项目中，最后下载至本地。
+上一节我将 icon 部分写成了文字，现在我们来看一下在 header.vue 中如何使用 IconFont。首先进入 [IconFont 官网](https://www.iconfont.cn/) 登录账号并创建一个项目，然后进入图标库，将需要的图标加入购物车，再进入购物车，将选择的图标添加到自己的项目中，最后下载至本地。
 
 将下载好的文件解压，将所需的文件拷贝到项目中：
 
@@ -126,26 +154,26 @@ import "./assets/style/iconfont.css";
 
 #### 2、代码优化
 
-每个项目都是有一个主题颜色的，比如这个项目是 #f60，我们可以把这个颜色放到一个变量之中，每次只需要修改这一个变量就可以了。
+每个项目都是有一个主题颜色的，比如这个项目是 #02bcd5，我们可以把这个颜色放到一个变量之中，每次只需要修改这一个变量就可以了。
 
 在 assets 下创建一个 varibles.styl 文件，定义一个背景色变量，例如：
 
 varibles.styl
 ```
-$bgColor = #f60
+$bgColor = #02bcd5
 ```
 
-如何使用这个变量呢？打开 header.vue 文件，通过 import 引入 varibles.styl 文件：
+如何使用这个变量呢？打开 header.vue 文件，通过圈a加 import 引入 varibles.styl 文件：
 
 header.vue
 ```
-@import "../../../assets/style/varibles.styl"
+@import "../../../assets/style/varibles"
 ```
 
 然后把 background-color 后面的值替换为 $bgColor 这个变量就可以了。
 
 
-接下来再做一个优化，我们看到找 varibles.styl 这个文件向上找了好几层，之前我们用过一个内容，让圈a代表 src 目录，那能不能在这里不写这么长，也用圈a来代替 src 目录？这样是可以的，但是因为这是在 style 中引入的，所以要在圈a前加一个“~”：
+接下来再做一个优化，我们看到找 varibles.styl 这个文件向上找了好几层，之前我们用过一个内容，让圈a代表 src 目录，那能不能在这里不写这么长的路径，也用圈a来代替 src 目录？这样是可以的，但是因为这是在 style 中引入的，所以要在圈a前加一个“~”：
 ```
 // @import "../../../assets/style/varibles.styl"
 @import "~@/assets/style/varibles.styl"
@@ -153,7 +181,7 @@ header.vue
 
 有的时候，我觉得像 style 这个目录里的东西到处都要用，比如说 main.js 里和 header.vue 里都在反复的使用这个目录，那有没有办法给他起一个别名呢？就像这个圈a符号一样。
 
-这样是可以的，打开 build 目录下的 webpack.base.conf.js 文件，找到 resolve 下的 alias（别名） 对象，在创建一个别名，例如：
+这样是可以的，打开 build 目录下的 webpack.base.conf.js 文件，找到 resolve 下的 alias（别名） 对象，再创建一个别名，例如：
 ```
 // ...
 alias: {
@@ -164,7 +192,7 @@ alias: {
 // ...
 ```
 
-然后就可以去修改 main.js 里和 header.vue 中对 style 的引入了，记得在修改了配置文件，需要重新启动项目。
+然后就可以去修改 main.js 里和 header.vue 中对 style 的引入了，记得在 style 标签中通过圈a 引入文件时，一定要在前面加“~”。最后，在修改了配置文件后，需要重新启动项目才能生效。
 
 main.js
 ```
@@ -182,4 +210,58 @@ header.vue
 // ...
 ```
 
+看一下此时的一个效果：
 
+![](https://upload-images.jianshu.io/upload_images/9373308-3acd88da9ed41a21.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+
+
+
+### 三、首页轮播图
+
+在 header 下，有一个轮播图，这个轮播图我们用 swiper 来实现。去 GitHub 上搜一下 (vue-awesome-swiper)[https://github.com/surmon-china/vue-awesome-swiper] 这个项目，根据文档内容在我们的项目中使用 npm 安装 swiper。：
+```
+npm install vue-awesome-swiper --save
+```
+
+![](https://upload-images.jianshu.io/upload_images/9373308-fc8526dfd2eae21f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+安装成功后，需要在 main.js 中引入 swiper 并使用：
+```
+// ...
+import VueAwesomeSwiper from 'vue-awesome-swiper'
+import 'swiper/dist/css/swiper.css'
+Vue.use(VueAwesomeSwiper, /* { default global options } */)
+// ...
+```
+
+在 pages 的 home 的 compoments 目录下新建一个 swiper.vue 组件，编写组件内容：
+
+swiper.vue
+```
+
+```
+
+然后去 Home.vue 中引入并使用 HomeSwiper 这个组件
+
+
+
+
+
+
+GitHub 上新建分支，swiper发布到这个分支上
+
+添加 swiper 组件并调用
+
+swiper 组件下再加一个元素，3G 网络的时候这个元素会抖动：解决，给 swiper 外层一个 div ，加样式 overflow : hidden;width:100%;height:0;padding-bottom:31.25%。
+
+scoped
+样式穿透
+.wrapper >>> .swiper-pagination-bullet-active{background: red!important}
+
+循环显示轮播数据
+
+提交到线上仓库
+
+
+### 四、

@@ -4,6 +4,7 @@ import Vue from "vue";
 import App from "./App";
 import router from "./router";
 import fastClick from "fastclick";
+import "./assets/js/rem.js";
 import "style/reset.css";
 import "style/border.css";
 import "style/iconfont.css";
