@@ -279,6 +279,8 @@ export default {
 
 最后还需要修改一下分页器被选中时的样式，直接在 .wrapper 下写 .swiper-pagination-bullet-active，然后设置背景色，发现并没有效果，这是因为我们在 style 标签中设置了 scope，解决方法：样式穿透，在 .swiper-pagination-bullet-active 前加 “>>>” 就可以了。
 
+
+
 基本代码已完成，接下来把它提交到分支 home-swiper 上，之前已经切换到 home-swiper 分支了，可以通过 git branch 检查一下，然后正常提交就可以了：
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-7dc366d7ab2a5543.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -287,9 +289,13 @@ export default {
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-f06f836b6f9472c2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
+然后通过命令 git checkout master 切换到主分支，与 home-swiper 分支合并。注意，在切换主分支之前，一定要将代码提交到仓库中。
+
+![](https://upload-images.jianshu.io/upload_images/9373308-064bd6e21129ff99.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
 
 
 
-### 四、
+
+
