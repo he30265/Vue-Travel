@@ -295,3 +295,249 @@ export default {
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-064bd6e21129ff99.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
+
+
+
+### 四、图标区域页面布局与逻辑实现
+
+和上一节首页轮播图一样，我们再创建一个分支 home-icons 并切换到这个分支，将图标区域组件提交到这个分支上去。流程一样，先新建一个 icons.vue，然后在 Home.vue 中引入这个组件，最后编辑这个组件的布局样式就行。
+
+注意，这块也应该是一个轮播效果，当图标超过8个的时候，在第二屏展示，可以根据 swiper.vue 对布局进行一个配置，在去哪网上找一些图标素材，把数据添加到组建的 data 下，通过 v-for 渲染出来。
+
+![image.png](https://upload-images.jianshu.io/upload_images/9373308-9a827ed1442a61dc.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+页面的布局样式我就不多说了，可以参考我写的结构样式：
+
+icons.vue
+```
+<template>
+  <div class="icon_list">
+    <swiper :options="swiperOption">
+      <swiper-slide>
+        <ul class="ul">
+          <li class="li" v-for="item of iconList" :key="item.id">
+            <a href class="a">
+              <img :src="item.imgSrc" alt class="ico">
+              <span class="txt">{{item.txt}}</span>
+            </a>
+          </li>
+        </ul>
+      </swiper-slide>
+      <div class="swiper-pagination" slot="pagination"></div>
+    </swiper>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "HomeIcons",
+  data() {
+    return {
+      swiperOption: {
+        loop: false,
+        pagination: {
+          el: ".swiper-pagination"
+        }
+      },
+      iconList: [
+        {
+          id:'001',
+          imgSrc:
+            "http://img1.qunarzz.com/piao/fusion/1803/95/f3dd6c383aeb3b02.png",
+          txt: "景点门票"
+        },
+        {
+          id:'002',
+          imgSrc:
+            "http://mp-piao-admincp.qunarzz.com/mp_piao_admin_mp_piao_admin/admin/20193/f0f00d6dfe038c044dbc9a437f58b0eb.png",
+          txt: "一日游"
+        },
+        {
+          id:'003',
+          imgSrc:
+            "http://img1.qunarzz.com/piao/fusion/1804/ff/fdf170ee89594b02.png",
+          txt: "北京必游"
+        },
+        {
+          id:'004',
+          imgSrc:
+            "http://img1.qunarzz.com/piao/fusion/1803/47/c2b659e048b11602.png",
+          txt: "溜娃游"
+        },
+        {
+          id:'005',
+          imgSrc:
+            "http://mp-piao-admincp.qunarzz.com/mp_piao_admin_mp_piao_admin/admin/20191/0334cf5430b9b5505fd79e2b8d7e8670.png",
+          txt: "爬长城"
+        },
+        {
+          id:'006',
+          imgSrc:
+            "http://img1.qunarzz.com/piao/fusion/1803/6c/9e54a8540fee0102.png",
+          txt: "故宫"
+        },
+        {
+          id:'007',
+          imgSrc:
+            "http://img1.qunarzz.com/piao/fusion/1803/76/eb88861d78fb9902.png",
+          txt: "动植物园"
+        },
+        {
+          id:'008',
+          imgSrc:
+            "http://mp-piao-admincp.qunarzz.com/mp_piao_admin_mp_piao_admin/admin/20195/35d83bb968d80d54926f30cfb92cb6ff.png",
+          txt: "限时抢购"
+        },
+        {
+          id:'009',
+          imgSrc:
+            "http://mp-piao-admincp.qunarzz.com/mp_piao_admin_mp_piao_admin/admin/20194/b4511345827006994aa1980a3886f0ac.png",
+          txt: "北京世园会"
+        }
+      ]
+    };
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+.icon_list >>> .swiper-container {
+  height: 2.8rem;
+}
+.icon_list {
+  margin: 0.24rem 0;
+  .ul {
+    overflow: hidden;
+    margin: 0 -0.1rem;
+    .li {
+      width: 25%;
+      float: left;
+      box-sizing: border-box;
+      padding: 0.08rem 0.1rem;
+      .a {
+        color: #333;
+        font-size: 0.26rem;
+        text-align: center;
+        display: block;
+        .ico {
+          width: 1rem;
+          height: 1rem;
+        }
+        .txt {
+          display: block;
+          font-size: 0.24rem;
+        }
+      }
+    }
+  }
+}
+</style>
+```
+
+上面代码中我添加了9个图标项，因为设置了轮播区域的高度，所以只显示出8个，如果想在第二屏显示剩下的轮播项该怎么做？我们可以通过 computed 属性来计算，回忆一下 ["Vue.js第2课-基础"](https://www.jianshu.com/p/bfb8aee31de4) 中的 computed 计算属性，它自带缓存机制，语法又比较简单。
+
+修改一下 icons.vue 中 js 部分的代码：
+
+icons.vue
+```
+export default {
+  name: "HomeIcons",
+  data() {
+    return {
+      swiperOption: {
+        loop: false,
+        pagination: {
+          el: ".swiper-pagination"
+        }
+      },
+      iconList: [
+        // ...
+      ]
+    };
+  },
+  computed: {
+    pages() {
+      const pages = [];
+      this.iconList.forEach((item, index) => {
+        const page = Math.floor(index / 8);
+        if (!pages[page]) {
+          pages[page] = [];
+        }
+        pages[page].push(item);
+      });
+      return pages;
+    }
+  }
+};
+```
+
+上面代码中，我们定义了一个 pages 属性，他返回一个内容，这个内容中先定义了一个数组 pages，这个数组就是最外层的一个数组，然后通过 forEach 便历 iconList，forEach 中传一个函数，他接收两个参数，第一个是便历出的每一项，第二个是每一项的下标，然后再定义一个 page，当前下标对应的数据应该展示在轮播图的第几屏，这个页码我们通过 Math.floor（向下取整）来计算，假设第3个数据，index 对应的是2，Math.floor(2/8) 是0，所以应该展示在第0页上，如果是第9个数据，index 对应的就是 8，Math.floor(8/8) 是1，所以第9个数据就会展示到第二页。page 计算完后，就可以做一个判断了，如果 pages 下面的第 page 项不存在，就让他等于一个空数组，然后把 item 添加到 pages 的第 page 项中。最后还需要返回 pages 这个属性。现在 pages 和 page 的关系其实就是这样的一个二维数组，pages 里包含着两个 page：
+```
+[[1,2,3,4,5,6,7,8],[9]]
+```
+
+数据便历出来了，接下来就该渲染到页面了，既然 pages 是一个二维数组，那么我们在模板中也要通过两个 v-for 来循环，先在 swiper-slide 中循环 pages，决定它是几页显示，然后在图标列表中循环 page，展示出每页的图标项。
+
+icons.vue
+```
+<template>
+  <div class="icon_list">
+    <swiper :options="swiperOption">
+      <swiper-slide v-for="(page,index) of pages" :key="index">
+        <ul class="ul">
+          <li class="li" v-for="item of page" :key="item.id">
+            <a href class="a">
+              <img :src="item.imgSrc" alt class="ico">
+              <span class="txt">{{item.txt}}</span>
+            </a>
+          </li>
+        </ul>
+      </swiper-slide>
+      <div class="swiper-pagination" slot="pagination"></div>
+    </swiper>
+  </div>
+</template>
+```
+
+这样就没问题了，第一屏8个图标项展示完后，第9个会显示到第二屏。
+
+![](https://upload-images.jianshu.io/upload_images/9373308-4e6677bdd2bd8f38.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+
+再来对模板做一个优化，如果图标下的文字多了，可能会影响页面的布局，这个时候可以通过样式来设置文字超出显示“...”：
+```
+overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+```
+
+其实，不仅这里会用到超出显示“...”，其他地方也会用到，那我们就可以借助 styl 提供的 mixin 对这块的代码进行封装。在 asset 下 style 目录中新建一个文件 mixins.styl，在这里定义一个 ellipsic 方法，他接收的参数就是上边这三行样式代码。
+
+mixins.styl
+```
+ellipsic() {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+```
+
+如何用这个方法呢？首先在样式中通过 import 引入这个 mixins 这个文件，然后在元素样式下直接使用 ellipsic() 就可以了例：
+```
+<style lang="stylus" scoped>
+@import "~style/mixins"
+.txt {
+    display: block;
+    font-size: 0.24rem;
+    padding:0 .1rem;
+    ellipsic();
+}
+```
+
+以上就完成了图标区域页面布局与逻辑实现，记得把代码提交到仓库，并切换到 master 分支合并
+
+
+
+
+
+
+
+

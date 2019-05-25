@@ -39,7 +39,7 @@ export default {
 .wrapper {
     overflow: hidden;
     width: 100%;
-    height: 1.7rem;
+    position:relative;
 
     .slide_img {
         width: 100%
