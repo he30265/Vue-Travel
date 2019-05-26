@@ -1,18 +1,18 @@
 <template>
-  <div class="header">
+<div class="header">
     <router-link to="/">
-      <div class="header_back">
-        <span class="iconfont">&#xe624;</span>
-      </div>
+        <div class="header_back">
+            <span class="iconfont">&#xe624;</span>
+        </div>
     </router-link>
 
     <div class="header_txt">城市选择</div>
-  </div>
+</div>
 </template>
 
 <script>
 export default {
-  name: "CityHeader"
+    name: "CityHeader"
 };
 </script>
 
@@ -20,19 +20,19 @@ export default {
 @import '~style/varibles';
 
 .header {
-  position: relative;
-  background-color: $bgColor;
-  overflow: hidden;
-  color: #fff;
-  padding: 0.2rem;
-
-  .header_back {
+    position: relative;
+    background-color: $bgColor;
+    overflow: hidden;
     color: #fff;
-    position: absolute;
-  }
+    padding: 0.2rem;
 
-  .header_txt {
-    text-align: center;
-  }
+    .header_back {
+        color: #fff;
+        position: absolute;
+    }
+
+    .header_txt {
+        text-align: center;
+    }
 }
 </style>

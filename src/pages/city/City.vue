@@ -1,12 +1,12 @@
 <template>
-    <city-header></city-header>
+<city-header></city-header>
 </template>
 
 <script>
 import CityHeader from "./components/header"
 export default {
-    name : "City",
-    components : {
+    name: "City",
+    components: {
         CityHeader
     }
 }

@@ -999,3 +999,96 @@ export default {
 以上我们就完成了首页通过 Ajax 获取到数据后，将数据传递给首页的每个子组件，并将数据渲染到页面上。
 
 最后，别忘了，提交代码到远程，并合并分支。
+
+
+
+## Vue.js第7课-项目实战-城市列表开发
+
+### 一、城市选择页面路由配置
+
+点击首页右上角的城市，会跳一个城市选择的页面，现在我们先来实现这个跳转的功能。
+
+首先在 pages 目录下新建一个城市的目录 city，在里面新建一个 components 目录和一个 City.vue 文件，和新建首页的方式是一样的。并在在 components 中新建一个属于城市列表页的头部组件 header.vue。然后在 City.vue 中引入并使用这个组件。接下来我们去 router/index.js 中配置一下路由，先引入 City.vue 这个组件，然后添加路由信息，设置城市列表页的路径是 /city。
+
+router/index.js
+```
+import Vue from "vue";
+import Router from "vue-router";
+import Home from "@/pages/home/Home";
+import City from "@/pages/city/City";
+
+Vue.use(Router);
+
+export default new Router({
+    routes: [
+        {
+            path: "/",
+            name: "Home",
+            component: Home
+        },{
+            path: "/city",
+            name: "City",
+            component: City
+        }
+    ]
+});
+```
+
+完成这些后，我们就可以去首页的 header 中添加路由跳转了。打开首页的 header 组件，在需要跳转的元素外层包裹一个 router-link，用属性 to 指向目标跳转页面，例如：
+
+pages/home/components/header.vue
+```
+<router-link to="city">
+  <div class="header_right">
+    {{this.city}}
+    <span class="iconfont">&#xe64a;</span>
+  </div>
+</router-link>
+```
+
+此时，点击右上角的城市，就会跳到一个城市列表页，完善一下页面的布局与样式，并给城市列表页的头部也加一个 router-link，让他能够返回。
+
+pages/city/components/header.vue
+```
+<template>
+<div class="header">
+    <router-link to="/">
+        <div class="header_back">
+            <span class="iconfont">&#xe624;</span>
+        </div>
+    </router-link>
+
+    <div class="header_txt">城市选择</div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "CityHeader"
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.header {
+    position: relative;
+    background-color: $bgColor;
+    overflow: hidden;
+    color: #fff;
+    padding: 0.2rem;
+
+    .header_back {
+        color: #fff;
+        position: absolute;
+    }
+
+    .header_txt {
+        text-align: center;
+    }
+}
+</style>
+```
+
+运行项目，点击首页右上角的城市，可以跳转到城市列表页，点击城市列表页左上角返回图标，可以返回到首页，以上就完成了城市选择页面的路由配置。
+
