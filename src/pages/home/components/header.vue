@@ -6,14 +6,17 @@
     <div class="header_center">
         <span class="iconfont">&#xe632;</span>
         输入城市/景点/游玩主题
-        </div>
-        <div class="header_right">北京 <span class="iconfont">&#xe64a;</span></div>
     </div>
+    <div class="header_right">{{this.city}} <span class="iconfont">&#xe64a;</span></div>
+</div>
 </template>
 
 <script>
 export default {
-    name: "HomeHeader"
+    name: "HomeHeader",
+    props: {
+        city: String
+    }
 };
 </script>
 
@@ -21,6 +24,7 @@ export default {
 // @import "../../../assets/style/varibles"
 // @import "~@/assets/style/varibles"
 @import "~style/varibles"
+
 .header {
     background-color: $bgColor;
     overflow: hidden;
