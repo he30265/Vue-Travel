@@ -1000,4 +1000,4 @@ export default {
 
 最后，别忘了，提交代码到远程，并合并分支。
 
-test
+clean password
