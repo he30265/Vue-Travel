@@ -781,9 +781,12 @@ export default {
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-db23eb0c13f4f8bb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-接下来将代码提交到远程仓库，并合并到主分支上，
+接下来将代码提交到远程仓库：
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-7563f5ca8516e86a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
+然后切换到主分支，并将 index-recommend 分支合并到主分支，记得，执行完合并命令后还需要 push 一下，提交到远程仓库。
+
+![](https://upload-images.jianshu.io/upload_images/9373308-3dc1efb9366e7ca9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
