@@ -790,15 +790,16 @@ export default {
 ![](https://upload-images.jianshu.io/upload_images/9373308-3dc1efb9366e7ca9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
+
 ### 六、Ajax 获取首页数据
 
 之前，首页的数据都是写死在 data 中的，这一章我们通过 Ajax 动态的获取首页的数据内容。首先还是创建一个分支 index-ajax，并切换到这个分支:
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-9106d18b08b43d9c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-在 Vue.js中发送 Ajax 请求有很多方式，比如说浏览器自带的 fetch 这个函数、vue-resource，先在官方推荐我们的是 axios 第三方模块，他可以实现跨平台的数据请求，比如在浏览器端 axios 可以发送 xhr 的请求，在 node 服务器上可以发送 http 请求。接下来看一下 axios 实现 Ajax 数据请求的方法。
+在 Vue.js 中发送 Ajax 请求有很多方式，比如说浏览器自带的 fetch 这个函数、vue-resource，现在官方推荐我们的是 axios 第三方模块，他可以实现跨平台的数据请求，比如在浏览器端 axios 可以发送 xhr 的请求，在 node 服务器上可以发送 http 请求。接下来看一下 axios 实现 Ajax 数据请求的方法。
 
-首先通过 npm 安装 axios,安装成功后，启动项目服务。
+首先通过 npm 安装 axios，安装成功后，启动项目服务。
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-112fbadce7d22c36.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -806,12 +807,29 @@ export default {
 之前在 pages/home/components 目录下新建了很多首页的组件，每一个组件都有自己的数据，如果每一个组件都在 data 中发一个 Ajax 请求，那组件如果非常多的话，就需要发送非常多的 Ajax 请求，这样一定会降低网站的性能，怎么做才比较合理呢？一个首页就让他发送一次 Ajax 请求，所以在 Home.vue 中发送 Ajax 请求就可以了，这个组件获取到数据后，可以把数据传给每一个子组件。
 
 回忆一下 Vue.js 中的生命周期函数 mounted，我们就借助这个生命周期函数来写 Ajax 数据的获取。首先通过 import 引入 axios，在 mounted 中这样写：
+```
+mounted() {
+    this.getHomeInfo();
+}
+```
 
-在 mounted 里写一个 this.getHomeInfo() 这样的语句，让页面挂载好了之后去执行 getHomeInfo 这个函数，把这个函数定义在 methods 中，这个方法就帮助我们获取 Ajax 的数据，使用 axios.get() 这个方法，去请求一个 url，这个 url 可以写成 /api/index.json，axios 返回的结果是一个 prom 对象，随意可以用 .then(this.getHomeInfoSucc)，再定义一个 getHomeInfoSucc 函数，他会收到一个结果，把结果打印出来。到网页上看一下：
+在 mounted 里写一个 this.getHomeInfo() 这样的语句，让页面挂载好了之后去执行 getHomeInfo 这个函数，把这个函数定义在 methods 中，这个方法就帮助我们获取 Ajax 的数据，使用 axios.get() 这个方法，去请求一个 url，这个 url 可以写成 /api/index.json，axios 返回的结果是一个 prom 对象，随意可以用 .then(this.getHomeInfoSucc)，再定义一个 getHomeInfoSucc 函数，他会收到一个结果，把结果打印出来。
+```
+methods: {
+    getHomeInfo() {
+        axios.get("/api/index.json").then(this.getHomeInfoSucc);
+    },
+    getHomeInfoSucc(result) {
+        console.log(result);
+    }
+},
+```
+
+到网页上看一下：
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-937c7695ae5e5bae.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-报错说，帮助你发送了一个 /api/index.json 的请求，但是这个请求返回的是404，因为先在就没有这个 json 文件，在没有后端支持的情况下，我们可模拟一下数据。子啊项目中，有一个叫 static 的目录，static 目录存放的是静态的文件，我们可以在瞎下面新建一个目录 mock，添加一个 json 文件，先随便添加一些内容。
+报错说，帮助你发送了一个 /api/index.json 的请求，但是这个请求返回的是404，因为现在就没有这个 json 文件，在没有后端支持的情况下，我们可模拟一下数据。在项目中，有一个叫 static 的目录，static 目录存放的是静态的文件，我们可以在下面新建一个目录 mock，添加一个 json 文件，先随便添加一些内容。
 
 为什么要把模拟数据放到 static 这个目录中呢？因为在整个项目中，只有 static 目录下的的内容可以被外部访问到，意思是在地址后跟上路径，只有 static 这个目录下的文件可以被访问到，访问其他路径就会自动重新定位回到首页。
 
@@ -824,7 +842,7 @@ export default {
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-d6f41334041b2e97.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-json 数据成功的获取出来了。可是，这么写就带来了一个新的问题，先在用的都是本地模拟的接口地址，加入代码要上线，肯定不能填成这样的一个地址，就需要在上线之前把这个地址重新替换成 api 格式的地址。上线之前改代码是有风险的，不建议这做，那怎么解决这个问题呢？
+json 数据成功的获取出来了。可是，这么写就带来了一个新的问题，现在用的都是本地模拟的接口地址，假如代码要上线，肯定不能填成这样的一个地址，就需要在上线之前把这个地址重新替换成 api 格式的地址。上线之前改代码是有风险的，不建议这做，那怎么解决这个问题呢？
 
 假设在开发环境中，我们依然这么写这个路径，但是如果有一个转发机制，可以帮助我们对 api 下面的所有 json 文件请求转发到本地的 mock 目录下，这样不就可以了么？
 
@@ -846,7 +864,7 @@ proxyTable: {
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-ba957eb26ffc050c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-页面没有问题，虽然我们取得是 /api 下的 index.json，实际上他已经帮我们自动的取到了 /mock 下的 index.json 的内容，接下来修改一下 index.json 里的内容，将之前写好的几个组件里的数据放进去，然后打开页面可以看一下：
+页面没有问题，虽然我们取的是 /api 下的 index.json，实际上他已经帮我们自动的取到了 /mock 下的 index.json 的内容，接下来修改一下 index.json 里的内容，将之前写好的几个组件里的数据放进去，然后打开页面可以看一下：
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-f671b87f954c5ef9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -856,60 +874,76 @@ proxyTable: {
 
 ### 七、首页父子组件数据传递
 
-这一章我们看一下如何把获取到的数据传给首页的每一个组件。也就是父组件向子组件传值的问题。
+这一章我们看一下如何把获取到的数据传给首页的每一个组件，也就是父组件向子组件传值的问题。
 
-在 Home.vue 中定义一个 data，这里返回所有子组件的数据，首先他要存一个 city，也就是首页 header 部分右上角的城市名，我们先给他一个空字符串。接着在 methods 中的 getHomeInfoSucc 方法下编写逻辑代码。
+在 Home.vue 中定义一个 data，这里返回所有子组件的数据，首先他要存一个 city，也就是首页 header 部分右上角的城市名，我们先给他一个空字符串，接着在 methods 中的 getHomeInfoSucc 方法下编写逻辑代码。
 
 在编写 index.json 的时候，添加了一个叫 ret 的属性，值为 true，他的意思就是后端正确的返回了结果。当 Ajax 请求到数据的时候，先做一个判断，如果后端正确的返回了结果并且结果中有 data 数据，就继续进行赋值的操作，我们让刚存的 city 的值等于返回结果中的 city，然后去 template 中找到header 这个组件，通过属性的形式向父组件进行传值，我们定义一个 city 属性，他的值就是下边 data 中返回的 city。接着，去 header.vue 中通过 props 接收这个值，使用插值表达式来渲染这个数据。
 
-给其他的子组件传数据也都是这种方式，例如轮播组件，接收到数据后，可以把组件自己的 data 数据都删掉，通过 props 接收到父组件的值后，在 v-for 中也修改一下列表数据就可以了，下面列出 Home.vue 和 swiper.vue 看一下：
+给其他的子组件传数据也都是这种方式，例如轮播组件，接收到数据后，可以把组件自己的 data 数据都删掉，通过 props 接收到父组件的值后，在 v-for 中也修改一下列表数据就可以了，下面列出我编写好的 Home.vue 和 swiper.vue 看一下：
 
 Home.vue
 ```
 <template>
-<div class="wrapper">
-    <swiper :options="swiperOption">
-        <swiper-slide v-for="(item,index) of list" :key="index">
-            <img :src="item.src" alt class="slide_img">
-      </swiper-slide>
-            <div class="swiper-pagination" slot="pagination"></div>
-    </swiper>
+<div>
+    <home-header :city="city"></home-header>
+    <home-swiper :list="swiperList"></home-swiper>
+    <home-icons :list="iconList"></home-icons>
+    <home-recomment :list="recommentList"></home-recomment>
+    <home-weekend :list="weekendList"></home-weekend>
 </div>
 </template>
 
 <script>
+import HomeHeader from "./components/header";
+import HomeSwiper from "./components/swiper";
+import HomeIcons from "./components/icons";
+import HomeRecomment from "./components/recommend";
+import HomeWeekend from "./components/weekend";
+import axios from "axios";
+
 export default {
-    name: "HomeSwiper",
-    props: {
-        list: Array
+    name: "home",
+    components: {
+        HomeHeader,
+        HomeSwiper,
+        HomeIcons,
+        HomeRecomment,
+        HomeWeekend
     },
     data() {
         return {
-            swiperOption: {
-                loop: true,
-                pagination: {
-                    el: '.swiper-pagination'
-                }
+            city: "",
+            swiperList: [],
+            iconList: [],
+            recommentList: [],
+            weekendList: []
+        }
+    },
+    methods: {
+        getHomeInfo() {
+            axios.get("/api/index.json").then(this.getHomeInfoSucc);
+        },
+        getHomeInfoSucc(result) {
+            result = result.data;
+            if (result.ret && result.data) {
+                const data = result.data;
+                this.city = data.city;
+                this.swiperList = data.swiperList;
+                this.iconList = data.iconList;
+                this.recommentList = data.recommendList;
+                this.weekendList = data.weekendList;
             }
-        };
+
+        }
+    },
+    mounted() {
+        this.getHomeInfo();
     }
 };
 </script>
 
-<style lang="stylus" scoped>
-.wrapper {
-    overflow: hidden;
-    width: 100%;
-    position: relative;
-
-    .slide_img {
-        width: 100%
-    }
-
-    >>>.swiper-pagination-bullet-active {
-        background-color: #fff
-    }
-}
+<style lang="">
 </style>
 ```
 
@@ -965,4 +999,3 @@ export default {
 以上我们就完成了首页通过 Ajax 获取到数据后，将数据传递给首页的每个子组件，并将数据渲染到页面上。
 
 最后，别忘了，提交代码到远程，并合并分支。
-
