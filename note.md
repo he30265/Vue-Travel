@@ -1092,3 +1092,48 @@ export default {
 
 运行项目，点击首页右上角的城市，可以跳转到城市列表页，点击城市列表页左上角返回图标，可以返回到首页，以上就完成了城市选择页面的路由配置。
 
+
+
+### 二、搜索框布局
+
+搜索框这个组件我们依然新建一个分支 city-search 并切换到这个分支进行开发，子组件的开发及在父组件上注册的流程我这里就不多说了，可以参考我编写的搜索框组件的布局样式：
+
+search.vue
+```
+<template>
+<div class="search">
+    <input class="ipt" type="text" placeholder="输入城市名或拼音">
+</div>
+</template>
+
+<script>
+export default {
+    name: "CitySearch"
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.search {
+    background-color: $bgColor;
+    overflow: hidden;
+    color: #fff;
+    padding: 0.2rem;
+
+    .ipt {
+        width: 100%;
+        background-color: #fff;
+        text-align: center;
+        color: #666;
+        height: .5rem;
+        line-height: .5rem;
+        box-sizing: border-box;
+        padding: 0 .2rem;
+    }
+}
+
+</style>
+```
+
+开发完成，记得提交代码并合并分支。
