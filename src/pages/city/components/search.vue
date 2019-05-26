@@ -17,7 +17,9 @@ export default {
     background-color: $bgColor;
     overflow: hidden;
     color: #fff;
-    padding: 0.2rem;
+    padding: 0 .2rem;
+    height .9rem
+    line-height .9rem
 
     .ipt {
         width: 100%;

@@ -24,7 +24,9 @@ export default {
     background-color: $bgColor;
     overflow: hidden;
     color: #fff;
-    padding: 0.2rem;
+    height: .72rem;
+    line-height: .72rem;
+    padding: 0 .2rem;
 
     .header_back {
         color: #fff;

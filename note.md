@@ -1137,3 +1137,224 @@ export default {
 ```
 
 开发完成，记得提交代码并合并分支。
+
+
+
+### 三、列表布局
+
+新建一个分支 city-list 并切换到这个分支进行开发，可以参考我编写的搜索框组件的布局样式：
+
+注意右侧有一个字母排序，给他先留一个区域，之后我们使用插件来修改这里。现在要做的就是把头部和上面的搜索框让出来，也就是让当前页面不能向下滚动，之后借助插件来实现一个拖拽效果。可以参考一下我编写的列表布局组件样式：
+
+list.vue
+```
+<template>
+<div class="list_wrapper">
+    <div class="lw_section">
+        <div class="ls_tit">当前城市</div>
+        <div class="ls_li">
+            <div class="button_box">
+                <div class="button">北京</div>
+            </div>
+        </div>
+    </div>
+    <div class="lw_section">
+        <div class="ls_tit">热门城市</div>
+        <div class="ls_li">
+            <div class="button_box">
+                <div class="button">北京</div>
+            </div>
+            <div class="button_box">
+                <div class="button">北京</div>
+            </div>
+            <div class="button_box">
+                <div class="button">北京</div>
+            </div>
+            <div class="button_box">
+                <div class="button">北京</div>
+            </div>
+        </div>
+    </div>
+    <div class="lw_section">
+        <div class="ls_tit">A</div>
+        <div class="ls_li">
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+        </div>
+        <div class="ls_tit">A</div>
+        <div class="ls_li">
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+        </div>
+        <div class="ls_tit">A</div>
+        <div class="ls_li">
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+            <div class="alp_li border-bottom">阿拉尔</div>
+        </div>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "CityList"
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.list_wrapper {
+    overflow: hidden;
+    position: absolute;
+    top: 1.5rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    .lw_section {
+        .ls_tit {
+            background-color: #f5f5f5;
+            padding: 0.2rem;
+            color: #212121;
+            font-size: 0.24rem;
+        }
+
+        .ls_li {
+            overflow: hidden;
+            padding: 0 0.5rem 0.2rem 0.1rem;
+
+            .button_box {
+                width: 33.3%;
+                float: left;
+                box-sizing: border-box;
+                padding: 0 0.1rem;
+                margin-top: 0.2rem;
+
+                .button {
+                    font-size: 0.24rem;
+                    border: 1px solid #ccc;
+                    text-align: center;
+                    padding: 0.1rem 0;
+                }
+            }
+
+            .alp_li {
+                padding: 0.2rem 0;
+                padding: 0.2rem 0.1rem;
+            }
+        }
+    }
+}
+</style>
+```
+
+
+
+### 四、Better-scroll 的使用及字母表布局
+
+上一节，我们给列表区域加了一个超出隐藏，并且设置了绝对定位，这个时候列表是没法拖动的，我们可以使用一个第三方的包 better-scroll 来解决这个问题。
+
+接着上面，先来看 [Better-scroll](https://github.com/ustbhuangyi/better-scroll) 的使用。 首先通过 npm 安装，然后看一下官网上的文档：
+```
+<div class="wrapper">
+  <ul class="content">
+    <li>...</li>
+    <li>...</li>
+    ...
+  </ul>
+  <!-- you can put some other DOMs here, it won't affect the scrolling -->
+</div>
+
+<script>
+import BScroll from 'better-scroll'
+const wrapper = document.querySelector('.wrapper')
+const scroll = new BScroll(wrapper)
+</script>
+```
+
+官网上告诉我们，使用这个插件，需要在包裹列表的元素外层，也套一层
+ div，所以我需要修改一下页面，在 list-wrapper 下在加一层 div 就可以了。然后引入 better-scroll，创建一个 better-scroll 实例。
+
+这里我们需要获取一下 Dom 元素，回忆一下[“Vue.js第3课-深入理解Vue组件（part01）”](https://www.jianshu.com/p/3f84f4724409)中 ref 的使用。给列表最外层元素一个 ref 属性，并给他一个值，将这个值传入 better-scroll 中。
+
+在 js 中，首先引入 better-scroll，然后将逻辑代码写到 mounted 中，意思是当页面 Dom 挂载后，执行这个效果，例：
+
+list.vue
+```
+<script>
+import BScroll from "better-scroll";
+export default {
+    name: "CityList",
+    mounted() {
+        this.scroll = new BScroll(this.$refs.wrapper);
+    }
+};
+</script>
+```
+
+这个时候打开页面，可以看到已经实现了一个滚动效果，并且有一个弹性的动画效果。
+
+最后，我们做一下右侧字母表的这个区块，依然是新建一个字母表组件，例如 alphabet，然后编写内容，并在 City.vue 中引用。右侧字母表组件可以参考我的样式布局：
+
+alphabet.vue
+```
+<template>
+<div class="alp_list">
+    <div class="ul">
+        <div class="li">A</div>
+        <div class="li">A</div>
+        <div class="li">A</div>
+        <div class="li">A</div>
+        <div class="li">A</div>
+        <div class="li">A</div>
+        <div class="li">A</div>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "CityAlphabet"
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.alp_list {
+    position: absolute;
+    top: 1.62rem;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 0.44rem;
+
+    .ul {
+        .li {
+            color: $ftColor;
+            text-align: center;
+            padding: 0 0.2rem;
+        }
+    }
+}
+</style>
+```
+
+然后打开页面，没有问题的话就会是下面的效果：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-de37ae04537e1811.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+以上就完成了城市列表的基本布局，下一节我们将逻辑添加到这个页面中。记得提交代码，合并分支。
+
