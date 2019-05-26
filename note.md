@@ -781,6 +781,9 @@ export default {
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-db23eb0c13f4f8bb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-接下来该提交到远程仓库了，
+接下来将代码提交到远程仓库，并合并到主分支上，
+
+![](https://upload-images.jianshu.io/upload_images/9373308-7563f5ca8516e86a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 
 
