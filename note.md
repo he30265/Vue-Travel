@@ -532,12 +532,255 @@ ellipsic() {
 }
 ```
 
-以上就完成了图标区域页面布局与逻辑实现，记得把代码提交到仓库，并切换到 master 分支合并
+以上就完成了图标区域页面布局与逻辑实现，记得把代码提交到仓库，并切换到 master 分支合并。
 
 
 
+### 五、“推荐组件”和“周末去哪组件”开发
 
+这两个组件我们放在一起讲，依然新建一个分支来开发，不过，我们换一种方式，使用成员协作的方式来开发。之前两个组件都是在同一个用户账户下，新建分支，开发完成之后再提交并合并，这次，我们试一下在这个项目仓库里添加一个团队成员，在他的账户上开发这个两个组件，再提交。具体操作方法可以参考我的 [“如何在GitHub上协作开发项目”](https://www.jianshu.com/p/4539b5dde0e2) 这篇文章。
 
+接下来，在这个新成员的账户环境下我们开始开发“推荐组件”和“周末去哪组件”这部分。首先还是新建并切换到 index-recommend 这个分支上，流程和之前的几个组件一样，先在 home 目录下的 components 目下新建一个 recommend.vue 文件和 weekend.vue，编写布局结构和逻辑代码，然后在 Home.vue 中引用这个两个组件，布局样式我就不多讲解了，可以参考我写好的布局样式，或上去哪网看一下。
 
+recommend.vue
+```
+<template>
+  <div class="rec_wrap">
+    <div class="rw_tit">猜你喜欢</div>
+    <div class="rw_list">
+      <div class="rl_li border-bottom" v-for="item of recommendList" :key="item.id">
+        <a href class="a">
+          <div class="pic">
+            <img :src="item.imgUrl" alt class="img">
+          </div>
+          <div class="info">
+            <div class="tit">{{item.infoTit}}</div>
+            <div class="txt">{{item.infoTxt}}</div>
+            <div class="money">
+              <b class="b">¥</b>
+              <i class="i">{{item.infoMoney}}</i>起
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="rw_more">
+      <a href class="a">查看所有产品</a>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "HomeRecommend",
+  data() {
+    return {
+      recommendList: [
+        {
+          id: "001",
+          imgUrl:
+            "http://img1.qunarzz.com/sight/p0/1902/84/84696f368bbec10da3.img.jpg_200x200_50323152.jpg",
+          infoTit: "北京世界园艺博览会",
+          infoTxt: "80条评论",
+          infoMoney: "108"
+        },
+        {
+          id: "002",
+          imgUrl:
+            "http://img1.qunarzz.com/sight/p0/1409/19/adca619faaab0898245dc4ec482b5722.jpg_200x200_1bc99086.jpg",
+          infoTit: "故宫",
+          infoTxt: "659条评论",
+          infoMoney: "60"
+        }
+      ]
+    };
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/mixins';
+@import '~style/varibles';
+
+.rec_wrap {
+  .rw_tit {
+    font-size: 0.32rem;
+    color: #333;
+    padding: 0.2rem;
+  }
+
+  .rw_list {
+    .rl_li {
+      padding: 0.2rem;
+
+      .a {
+        color: #333;
+        display: flex;
+
+        .pic {
+          width: 2rem;
+          height: 2rem;
+
+          .img {
+            width: 100%;
+          }
+        }
+
+        .info {
+          flex: 1;
+          min-width: 0;
+          padding: 0.2rem;
+          box-sizing: border-box;
+
+          .tit {
+            font-size: 0.28rem;
+            ellipsic();
+          }
+
+          .txt {
+            font-size: 0.22rem;
+            color: #666;
+            margin: 0.2rem 0;
+            ellipsic();
+          }
+
+          .money {
+            font-size: 0.22rem;
+            color: #666;
+
+            .b {
+              font-size: 0.18rem;
+              color: #ff7b00;
+            }
+
+            .i {
+              font-size: 0.38rem;
+              color: #ff7b00;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .rw_more {
+    .a {
+      display: block;
+      text-align: center;
+      font-size: 0.28rem;
+      padding: 0.2rem 0;
+      color: $ftColor;
+    }
+  }
+}
+</style>
+```
+
+补充：在原网站上每一个列表项都有一个下边的，回忆一下在("Vue.js第5课-Vue项目预热)[https://www.jianshu.com/p/402e35c9e978] 讲过的1像素边框的问题，那个时候在全局引入了一个 border.css，所以这个下边框就不需要在样式选择器中写了，直接在这个元素标签上加一个 border-bottom 的 class 名就可以了。
+
+weekend.vue
+```
+<template>
+  <div class="rec_wrap">
+    <div class="rw_tit">周末去哪儿</div>
+    <div class="rw_list">
+      <div class="rl_li" v-for="item of weekendList" :key="item.id">
+        <a href class="a">
+          <div class="pic">
+            <img :src="item.imgUrl" alt class="img">
+          </div>
+          <div class="info">
+            <div class="tit">{{item.infoTit}}</div>
+            <div class="txt">{{item.infoTxt}}</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "HomeWeekend",
+  data() {
+    return {
+      weekendList: [
+        {
+          id: "001",
+          imgUrl:
+            "http://img1.qunarzz.com/sight/source/1603/6d/2f67ae0659f41f.jpg_r_640x214_bf6cbd0b.jpg",
+          infoTit: "北京赏花好地方",
+          infoTxt: "乱花渐欲迷人眼，京城赏花大搜索"
+        },
+        {
+          id: "002",
+          imgUrl:
+            "http://img1.qunarzz.com/sight/source/1811/f3/86173f863bef61.jpg_r_640x214_52b003ac.jpg",
+          infoTit: "京城周末撒欢",
+          infoTxt: "在帝都过周末，不仅仅是城中游！"
+        }
+      ]
+    };
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/mixins';
+@import '~style/varibles';
+
+.rec_wrap {
+  background-color: #f4f4f4;
+
+  .rw_tit {
+    font-size: 0.32rem;
+    color: #333;
+    padding: 0.2rem;
+  }
+
+  .rw_list {
+    .rl_li {
+      margin-bottom: 0.1rem;
+
+      .a {
+        color: #333;
+
+        .pic {
+          width: 100%;
+
+          .img {
+            width: 100%;
+          }
+        }
+
+        .info {
+          box-sizing: border-box;
+          padding: 0.2rem;
+          background-color: #fff;
+
+          .tit {
+            font-size: 0.28rem;
+            ellipsic();
+          }
+
+          .txt {
+            font-size: 0.22rem;
+            color: #666;
+            margin-top: 0.2rem;
+            ellipsic();
+          }
+        }
+      }
+    }
+  }
+}
+</style>
+```
+
+ 编写好 recommend.vue 和 weekend.vue 后，效果应该是这样的：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-db23eb0c13f4f8bb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+接下来该提交到远程仓库了，
 
 

@@ -105,6 +105,10 @@ export default {
 @import "~style/mixins"
 .icon_list >>> .swiper-container {
   height: 2.8rem;
+  padding-bottom .2rem
+}
+.icon_list >>> .swiper-pagination{
+  bottom 0
 }
 .icon_list {
   margin: 0.24rem 0;

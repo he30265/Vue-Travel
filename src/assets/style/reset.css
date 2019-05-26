@@ -19,3 +19,5 @@ input, textarea { font: 14px 'microsoft Yahei', 'Arial', sans-serif; box-sizing:
 img { vertical-align: middle; border: 0; }
 ul, li { list-style: none; }
 dl, dt, dd { display: block; }
+i { font-style: normal; }
+b { font-weight: normal; }
