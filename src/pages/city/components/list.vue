@@ -18,10 +18,10 @@
             </div>
         </div>
         <div class="lw_section">
-            <div v-for="(item,key) of cities">
+            <div v-for="(item,key) of cities" :key="key" :ref="key">
                 <div class="ls_tit">{{key}}</div>
                 <div class="ls_li">
-                    <div class="alp_li border-bottom" v-for="city of item">{{city.name}}</div>
+                    <div class="alp_li border-bottom" v-for="city of item" :key="item.id">{{city.name}}</div>
                 </div>
             </div>
         </div>
@@ -35,10 +35,19 @@ export default {
     name: "CityList",
     props: {
         hotCities: Array,
-        cities: Object
+        cities: Object,
+        letter: String
     },
     mounted() {
         this.scroll = new BScroll(this.$refs.wrapper);
+    },
+    watch: {
+        letter() {
+            if (this.letter) {
+                const element = this.$refs[this.letter][0];
+                this.scroll.scrollToElement(element);
+            }
+        }
     }
 };
 </script>

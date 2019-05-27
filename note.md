@@ -1515,9 +1515,443 @@ export default {
 </style>
 ```
 
-完成了这两组数据的渲染之后，我们提交一下代码，并合并到主分支。
+接着再完成右侧字母表的数据渲染，通过 Ajax 将字母表数据渲染到 alphabet.vue 中，方式和 list.vue 中渲染城市首字母的方式一样，使用的也是同一个数据：
+
+alphbet.vue
+```
+<template>
+<div class="alp_list">
+    <div class="ul">
+        <div class="li" v-for="(item,key) of cities" :key="key">{{key}}</div>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "CityAlphabet",
+    props:{
+        cities : Object
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.alp_list {
+    position: absolute;
+    top: 1.62rem;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 0.44rem;
+
+    .ul {
+        .li {
+            color: $ftColor;
+            text-align: center;
+            padding: 0 0.2rem;
+        }
+    }
+}
+</style>
+```
+
+当前效果图：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-ab4ae0c34f1a9695.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+完成 Ajax 数据的渲染之后，我们提交一下代码，并合并到主分支。
+
+下一节我们来介绍如何实现点击右侧字母，定位到左侧对应首字母城市列表位置的这样一个效果了。
 
 
-接着我们完成一下右侧，看一下点击字母跳转到对应的字母下的城市列表该怎么实现。同样，新建 city-comments 分支，在这个分支上进项右侧功能的开发。
+
+
+### 六、兄弟组件间联动
+
+首先还是创建一个分支 git-comments，将这部分功能提交到这个分支上。
+
+先来实现这样一个功能，点击右侧字母表，例如点击 B，城市列表就会定位到以 B 字母开头的城市。
+
+打开 alphabet.vue，在循环的元素上加一个点击事件，例如 handleAlpClick，然后在 methods 中写这个事件方法，当执行点击方法的时候，这个事件会接受一个 e 对象，可以 console.log 在控制台看一下这个对象有哪些内容。这样我们就可以通过 e.target.innerHTML 获取到被点击的元素的值。然后回忆一下子组件是如何向父组件传值的，我们通过 emit 向外触发一个 change 事件，再传一个刚才获取到的元素的值到父组件 list.vue 中，让 list.vue 中对应字母的区块显示出来。现在我们要做的就是兄弟组件之间的传值，之前在["Vue.js第3课-深入理解Vue组件（part02）"](https://www.jianshu.com/p/451ae220bc7f)中讲过非父子组件的传值方法，通过 bus 总线的形式来传值。但是因为我们现在这个非父子组件非常的简单，可以让 alphabet 组件将值传递给 City 组件，然后 City 组件再将值转发给 list 组件，这样就实现了兄弟组件的传值。刚才我们已经通过 emit 向父组件出发了一个 change 事件，接下来去 City 中接收一下这个方法。
+
+打开 City.vue，在模板中绑定一个 change 方法，方法名叫 handleAlpChange，然后在 methods 写这个方法，这个方法接受一个值 letter，这个 letter 就是 alphabet.vue 中获取的被点击的元素的值，可以在这个方法中 console.log 一下这个 letter，可以看到，他就是当前被点击的元素的值，此时，父组件就接收到子组件传来的这个数据了。
+
+接下来，我们在将父组件接收到的这个数据传给子组件 list.vue，父组件是通过属性向子组件传值的。首先在父组件 City.vue 里的 data 中定义一个 letter，默认值是空，在 handleAlpChange 方法中，当接受到外部传来的 letter 的时候，让 this.letter = letter。最后只需要把 letter 传递给子组件 list 就可以了，在 City 组件的模板 city-list 中通过 :letter="letter" 向子组件 list 传值。打开 list.vue，在 props 中接收这个 letter，并且验证类型为 String 类型。现在要做的就是，当 list.vue 发现 letter 有改变的时候，就需要让组件显示的列表项跟 letter 相同的首字母的列表项要显示出来，怎么做呢？
+
+这个时候就要借助一个侦听器，回忆一下[”Vue.js第2课-基础“](https://www.jianshu.com/p/bfb8aee31de4)中的 watch 侦听器，我们要在 list.vue 这个组件里监听 letter 的变化，一旦 letter 变了，我们就需要做一些事情。先来打印一下 letter，可以看到，点击字母，就会打印出对应的字母，以上就完成了子组件监听父组件传来的数据的变化。
+
+接下来就该在 侦听器里的 letter 方法中编写逻辑代码了。better-scroll 给我们提供了这样一个接口，scroll.scorllToElement
+
+如果 letter 不为空的时候，就调用 this.scroll.scrollToElement() 这个方法，可以让滚动区自动滚到某一个元素上，那么怎么传这个元素呢？在循环城市这一块中，我们给循环项加一个 ref 引用来获取当前 Dom 元素，让他也等于 key 就行，然后回到侦听器的 letter 中，定义一个 element，他就等于通过 ref 获取到的元素：
+```
+const element = this.$refs[this.letter][0];
+```
+
+这个时候就可以通过字母获取到他对应的区域，然后把 element 传入 scrollToElement 里，注意，上边代码最后加了一个 [0]，这是因为如果不加，通过 ref 或的的内容就是一个数组，这个数组里的第一个元素才是真正的 DOM 元素，这个时候，点击右侧字母表，就可以跳到对应的字母下的城市列表了。
+
+点击跳转的功能实现啦，接下来再实现一下滑动右侧字母表，左侧城市列表切换的效果。
+
+首先在 alphabet.vue 组件的模板中给循环项绑定三个新的事件： touchstart 事件 handleTouchStart、touchmove 事件 handleTouchMove 和 touchend 事件 handleTouchEnd，然后将这三个事件写到 methods 中，这三个事件需要帮我们做一些事，当 touchstart 事件执行之后，才会触发 touchmove 事件，所以要在 data 中定义一个标识位 touchSataus，默认值为 false，当手指触摸的时候，也就是触发 touchstart 事件的时候，在 handleTouchStart 方法中让 this.touchstart = true，当结束滑动的时候，在 handleTouchEnd 方法中让 this.touchstart = false。只有在触发 touchmove 事件的时候，才会执行 handleTouchMove 方法，主要的逻辑代码也就在 handleTouchMove 方法中来实现。
+
+在 handleTouchMove 方法中，先做一个判断，也就是当 this.touchSataus 为 true 的时候，再编写下面的代码。先定义一个 startY 来获 A 字母距页面顶部的高度是多少，然后定义一个 touchY 来获取当前手指距离顶部的高度，做一个差值，就能够算出当前手指位置和 A 字母顶部的一个差值，再除以每个字母的高度，我就可以知道当前是第几个字母了，然后我去去对应的字母，触发一个 change 事件给外部就可以了。
+
+如果想根据下标找到对应下标的字母的话，就需要有一个数组来存储这个字母的列表，现在我们通过 props 接收的 cities 是一个对象，不是一个数组，我们需要定义一个数组类型的数据，这里用到了 computed 计算属性，回忆一下[”Vue.js第2课-基础“](https://www.jianshu.com/p/bfb8aee31de4)中的 computed 属性。在计算属性中定义一个 letters 的一个属性默认为一个空数组，然后通过 for 循环遍历出 cities 中的每一项，添加到 letters 中，这样我们就构建出一个名字叫做 letters 的计算属性，然后赴安徽这个属性，他的内容就是一个只包含字母表的一个数组了，那么上面的循环项也可以修改一下了，将 v-for 中的 cities 改为 letters，key 值让他等于 item 就可以了，传值也是 item 就可以了。
+
+接下来再回到 handleTouchMove 方法中，继续编写拖动的代码，上面 touchY 获取了当前手指距离顶部的高度，因为上面还有城市选择和输入框的元素，所以需要减去这两个元素的高度，可以打印一下这个值，在浏览器中可以看到这个值是不断变化的。接着子啊定义一个 index 的变量，他是一个字母的下标，他就等于 touchY - startY，再除以每个字母的高度，最后做一个向下取整，也就是：
+```
+const index = Math.floor((touchY - startY) / 22);
+```
+
+这样就可以算出当前手指滑动的位置对应的字母的下标是多。最后一步，通过 emit 向父组件触发一个 change 事件，并传一个下标对应的字母。这个 emit 是要写在一个判断里的，判断当 index 大于等于 0 并且 index 小于 letters 的长度，再去通过 emit 触发事件。
+
+这个时候就实现了拖动右侧，左侧也跟着变得效果了，下面我把 alphabet 和  list 这两个子组件及 City 这个父组件粘贴到笔记中：
+
+alphhabet.vue
+```
+<template>
+<div class="alp_list">
+    <div class="ul">
+        <div class="li" :ref="item" v-for="item of letters" :key="item" @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchendå="handleTouchEnd" @click="handleAlpClick">{{item}}</div>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "CityAlphabet",
+    props: {
+        cities: Object
+    },
+    computed: {
+        letters() {
+            const letters = [];
+            for (let i in this.cities) {
+                letters.push(i);
+            }
+            return letters;
+        }
+    },
+    data() {
+        return {
+            touchSataus: false
+        };
+    },
+    methods: {
+        handleAlpClick(e) {
+            this.$emit("change", e.target.innerHTML);
+        },
+        handleTouchStart() {
+            this.touchSataus = true;
+        },
+        handleTouchMove(e) {
+            if (this.touchSataus) {
+                const startY = this.$refs["A"][0].offsetTop;
+                const touchY = e.touches[0].clientY - 81;
+                const index = Math.floor((touchY - startY) / 22);
+                if (index >= 0 && index < this.letters.length) {
+                    this.$emit("change", this.letters[index]);
+                }
+            }
+        },
+        handleTouchEnd() {
+            this.touchSataus = false;
+        }
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.alp_list {
+    position: absolute;
+    top: 1.62rem;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 0.44rem;
+
+    .ul {
+        .li {
+            color: $ftColor;
+            text-align: center;
+            padding: 0 0.2rem;
+        }
+    }
+}
+</style>
+```
+
+City.vue
+```
+<template>
+<div>
+    <city-header></city-header>
+    <city-search></city-search>
+    <city-list :hotCities="hotCities" :cities="cities" :letter="letter"></city-list>
+    <city-alphabet :cities="cities" @change="handleAlpChange"></city-alphabet>
+</div>
+</template>
+
+<script>
+import CityHeader from "./components/header";
+import CitySearch from "./components/search";
+import CityList from "./components/list";
+import CityAlphabet from "./components/alphabet";
+import axios from "axios";
+export default {
+    name: "City",
+    components: {
+        CityHeader,
+        CitySearch,
+        CityList,
+        CityAlphabet
+    },
+    data() {
+        return {
+            hotCities: [],
+            cities: {},
+            letter: ""
+        };
+    },
+    methods: {
+        getCityInfo() {
+            axios.get("/api/city.json").then(this.getCitySuccess);
+        },
+        getCitySuccess(result) {
+            if (result.data.ret && result.data.data) {
+                const data = result.data.data;
+                this.hotCities = data.hotCities;
+                this.cities = data.cities;
+            }
+        },
+        handleAlpChange(letter) {
+            this.letter = letter;
+        }
+    },
+    mounted() {
+        this.getCityInfo();
+    }
+};
+</script>
+
+<style lang="stylus" scoped></style>
+```
+
+list.vue
+```
+<template>
+<div class="list_wrapper" ref="wrapper">
+    <div>
+        <div class="lw_section">
+            <div class="ls_tit">当前城市</div>
+            <div class="ls_li">
+                <div class="button_box">
+                    <div class="button">北京</div>
+                </div>
+            </div>
+        </div>
+        <div class="lw_section">
+            <div class="ls_tit">热门城市</div>
+            <div class="ls_li">
+                <div class="button_box" v-for="item of hotCities" :key="item.id">
+                    <div class="button">{{item.name}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="lw_section">
+            <div v-for="(item,key) of cities" :key="key" :ref="key">
+                <div class="ls_tit">{{key}}</div>
+                <div class="ls_li">
+                    <div class="alp_li border-bottom" v-for="city of item" :key="item.id">{{city.name}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+
+<script>
+import BScroll from "better-scroll";
+export default {
+    name: "CityList",
+    props: {
+        hotCities: Array,
+        cities: Object,
+        letter: String
+    },
+    mounted() {
+        this.scroll = new BScroll(this.$refs.wrapper);
+    },
+    watch: {
+        letter() {
+            if (this.letter) {
+                const element = this.$refs[this.letter][0];
+                this.scroll.scrollToElement(element);
+            }
+        }
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.list_wrapper {
+    overflow: hidden;
+    position: absolute;
+    top: 1.62rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    .lw_section {
+        .ls_tit {
+            background-color: #f5f5f5;
+            padding: 0.2rem;
+            color: #212121;
+            font-size: 0.24rem;
+        }
+
+        .ls_li {
+            overflow: hidden;
+            padding: 0 0.5rem 0.2rem 0.1rem;
+
+            .button_box {
+                width: 33.3%;
+                float: left;
+                box-sizing: border-box;
+                padding: 0 0.1rem;
+                margin-top: 0.2rem;
+
+                .button {
+                    font-size: 0.24rem;
+                    border: 1px solid #ccc;
+                    text-align: center;
+                    padding: 0.1rem 0;
+                }
+            }
+
+            .alp_li {
+                padding: 0.2rem 0;
+                padding: 0.2rem 0.1rem;
+            }
+        }
+    }
+}
+</style>
+```
+
+以上就完成了字母表组件和列表组件进行了关联，兄弟组件间的通信，包括父子组件之间的通信也在项目中做了真实的应用。最后，记得提交代码合并分支。
+
+
+
+
+### 七、列表切换性能优化
+
+这一节我们来优化一下列表页面的性能，首先打开 alphabet.vue，上一节在这个组件中写了一个 handleTouchMove 方法，在里面获取了一个 A 标签的 offsetTop 值，这个值一直都是固定的，而我们需要每次执行这个方法的时候，都会去运算一次，所以他的性能比较低，提高这块的性能，我们可以这样去写：
+
+在 data 里再定义一个变量 startY，初始值为 0，在写一个 updated 生命周期钩子，当页面的数据被更新的时候，同时页面完成了自己的渲染之后，updated 这个钩子就会被执行，他执行的时候，startY 就等于我们在 handleTouchMove 方法中定义的 startY 的值，还要把 index 中减去的 startY 替换成 this.startY，保存一下，到页面上看一下，效果没有问题。
+
+看一下 updated 这一块是怎么回事，当初次渲染 alphabet.vue 的时候，用的是 City.vue 中的 cities 来渲染的，City.vue 中初始的 cities 值是一个空对象，也就是页面刚加载在的时候，alphabet.vue 什么定西都不会显示出来，当 City.vue Ajax 获取到数据之后，cities 的值才发生变化，alphabet 才被渲染出来，当往 alphabet 传的数据发生变化的时候，alphabet 这个组件就会重新渲染，当 alphabet 重新渲染之后，udated 这个生命周期钩子就会被执行，这个时候页面上已经展示出了城市字母列表里的所有内容，那么这个时候我们就去会去 A 这个字母所在的城市列表所有的内容，也就去获取 A 所对应的 DOM 的 offsetTop 的值，就没有任何的问题。
+
+这是第一步的性能优化，第二步做一个函数截流的性能优化。
+
+当鼠标在字母表上来回移动的时候，这个时候，touchMove 执行的频率是非常高的，可以通过截流限制一下函数执行的频率。怎么做呢？可以在数据项中定义一个 timer，默认值等于 null，然后到 handleTouchMove 中编写代码。如果已经存在了，就 clearTimeout，否则，就创建一个 timer，给他一个 setTimeout 方法，将下面的逻辑代码剪切到这个定时器。也就是正在做这件事情的时候，我让他延时 16ms 再去执行，假设在这 16ms 之间，你又去做了手指的滚动，他就会把上一次做的操作给清除掉，重新做你这一次要做的事情，通过这种函数截流的方式，可以大大的节约 handleTouchMove 这个函数的执行频率，从而提高函页面的性能。更新一下 alphabet.vue 中的代码；
+```
+<template>
+<div class="alp_list">
+    <div class="ul">
+        <div class="li" :ref="item" v-for="item of letters" :key="item" @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchendå="handleTouchEnd" @click="handleAlpClick">{{item}}</div>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "CityAlphabet",
+    props: {
+        cities: Object
+    },
+    computed: {
+        letters() {
+            const letters = [];
+            for (let i in this.cities) {
+                letters.push(i);
+            }
+            return letters;
+        }
+    },
+    data() {
+        return {
+            touchSataus: false,
+            startY: 0,
+            timer: null
+        };
+    },
+    updated() {
+        this.startY = this.$refs["A"][0].offsetTop;
+    },
+    methods: {
+        handleAlpClick(e) {
+            this.$emit("change", e.target.innerHTML);
+        },
+        handleTouchStart() {
+            this.touchSataus = true;
+        },
+        handleTouchMove(e) {
+            if (this.touchSataus) {
+                if (this.timer) {
+                    clearTimeout;
+                }
+                this.timer = setTimeout(() => {
+                    const touchY = e.touches[0].clientY - 81;
+                    const index = Math.floor((touchY - this.startY) / 22);
+                    if (index >= 0 && index < this.letters.length) {
+                        this.$emit("change", this.letters[index]);
+                    }
+                }, 16);
+            }
+        },
+        handleTouchEnd() {
+            this.touchSataus = false;
+        }
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.alp_list {
+    position: absolute;
+    top: 1.62rem;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 0.44rem;
+
+    .ul {
+        .li {
+            color: $ftColor;
+            text-align: center;
+            padding: 0 0.2rem;
+        }
+    }
+}
+</style>
+```
+
+以上就完成了列表切换性能优化，记得提交代码合并分支。
+
 
 
