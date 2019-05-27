@@ -1358,3 +1358,166 @@ export default {
 
 以上就完成了城市列表的基本布局，下一节我们将逻辑添加到这个页面中。记得提交代码，合并分支。
 
+
+
+### 五、页面的动态数据渲染
+
+这一章使用 axios 将城市数据动态渲染到城市列表页，城市的数据存放在 static/mock/city.json 中，因为内容比较多，可以直接去我的 [项目线上仓库](https://github.com/he30265/Vue-Travel) 下载。
+
+首先在 City.vue 中通过 ajax 获取 city.json 中的数据，然后在 data 中返回获取到的热门城市数组和所有城市对象，通过属性将这两组数据传递给子组件 list.vue。
+
+City.vue
+```
+<template>
+<div>
+    <city-header></city-header>
+    <city-search></city-search>
+    <city-list :hotCities="hotCities" :cities="cities"></city-list>
+    <city-alphabet></city-alphabet>
+</div>
+</template>
+
+<script>
+import CityHeader from "./components/header";
+import CitySearch from "./components/search";
+import CityList from "./components/list";
+import CityAlphabet from "./components/alphabet";
+import axios from "axios";
+export default {
+    name: "City",
+    components: {
+        CityHeader,
+        CitySearch,
+        CityList,
+        CityAlphabet
+    },
+    data() {
+        return {
+            hotCities: [],
+            cities: {}
+        };
+    },
+    methods: {
+        getCityInfo() {
+            axios.get("/api/city.json").then(this.getCitySuccess);
+        },
+        getCitySuccess(result) {
+            if (result.data.ret && result.data.data) {
+                const data = result.data.data;
+                this.hotCities = data.hotCities;
+                this.cities = data.cities;
+            }
+        }
+    },
+    mounted() {
+        this.getCityInfo();
+    }
+};
+</script>
+
+<style lang="stylus" scoped></style>
+```
+
+接下来去子组件中通过 props 接收这两组数据，并渲染到页面上：
+
+list.vue
+```
+<template>
+<div class="list_wrapper" ref="wrapper">
+    <div>
+        <div class="lw_section">
+            <div class="ls_tit">当前城市</div>
+            <div class="ls_li">
+                <div class="button_box">
+                    <div class="button">北京</div>
+                </div>
+            </div>
+        </div>
+        <div class="lw_section">
+            <div class="ls_tit">热门城市</div>
+            <div class="ls_li">
+                <div class="button_box" v-for="item of hotCities" :key="item.id">
+                    <div class="button">{{item.name}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="lw_section">
+            <div v-for="(item,key) of cities">
+                <div class="ls_tit">{{key}}</div>
+                <div class="ls_li">
+                    <div class="alp_li border-bottom" v-for="city of item">{{city.name}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+
+<script>
+import BScroll from "better-scroll";
+export default {
+    name: "CityList",
+    props: {
+        hotCities: Array,
+        cities: Object
+    },
+    mounted() {
+        this.scroll = new BScroll(this.$refs.wrapper);
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.list_wrapper {
+    overflow: hidden;
+    position: absolute;
+    top: 1.62rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    .lw_section {
+        .ls_tit {
+            background-color: #f5f5f5;
+            padding: 0.2rem;
+            color: #212121;
+            font-size: 0.24rem;
+        }
+
+        .ls_li {
+            overflow: hidden;
+            padding: 0 0.5rem 0.2rem 0.1rem;
+
+            .button_box {
+                width: 33.3%;
+                float: left;
+                box-sizing: border-box;
+                padding: 0 0.1rem;
+                margin-top: 0.2rem;
+
+                .button {
+                    font-size: 0.24rem;
+                    border: 1px solid #ccc;
+                    text-align: center;
+                    padding: 0.1rem 0;
+                }
+            }
+
+            .alp_li {
+                padding: 0.2rem 0;
+                padding: 0.2rem 0.1rem;
+            }
+        }
+    }
+}
+</style>
+```
+
+完成了这两组数据的渲染之后，我们提交一下代码，并合并到主分支。
+
+
+接着我们完成一下右侧，看一下点击字母跳转到对应的字母下的城市列表该怎么实现。同样，新建 city-comments 分支，在这个分支上进项右侧功能的开发。
+
+
