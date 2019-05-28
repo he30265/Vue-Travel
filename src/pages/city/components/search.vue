@@ -26,9 +26,9 @@ export default {
             timer: null
         };
     },
-    computed:{
-        hasNoData(){
-            return !this.list.length
+    computed: {
+        hasNoData() {
+            return !this.list.length;
         }
     },
     watch: {

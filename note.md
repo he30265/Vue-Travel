@@ -940,4 +940,114 @@ export default {
 
 先在，页面上始终都会显示这个查询结果元素，他把下面的元素都覆盖掉了，现在来解决一下这个问题。我们可以让 search_content 这个元素的显示与否通过一个变量来决定，v-show="keyword"，意思是，当有这个 keyword 的时候，才显示 search_content 查询结果的元素。
 
+附上最终的 search.vue 的代码：
+
+search.vue
+```
+<template>
+<div class="search">
+    <div>
+        <input class="ipt" type="text" placeholder="输入城市名或拼音" v-model="keyword">
+        <div class="search_content" ref="search" v-show="keyword">
+            <ul>
+                <li class="border-bottom" v-for="item of list" :key="item.id">{{item.name}}</li>
+                <li class="border-bottom" v-show="hasNoData">没有找到匹配数据</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</template>
+
+<script>
+import BScroll from "better-scroll";
+export default {
+    name: "CitySearch",
+    props: {
+        cities: Object
+    },
+    data() {
+        return {
+            keyword: "",
+            list: [],
+            timer: null
+        };
+    },
+    computed: {
+        hasNoData() {
+            return !this.list.length;
+        }
+    },
+    watch: {
+        keyword() {
+            if (this.timer) {
+                clearTimeout(this.timer);
+            }
+            if (!this.keyword) {
+                this.list = [];
+                return;
+            }
+            this.timer = setTimeout(() => {
+                const result = [];
+                for (let i in this.cities) {
+                    this.cities[i].forEach(value => {
+                        if (
+                            value.spell.indexOf(this.keyword) > -1 ||
+                            value.name.indexOf(this.keyword) > -1
+                        ) {
+                            result.push(value);
+                        }
+                    });
+                }
+                this.list = result;
+            }, 100);
+        }
+    },
+    mounted() {
+        this.scroll = new BScroll(this.$refs.search);
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.search {
+    background-color: $bgColor;
+    overflow: hidden;
+    padding: 0 0.2rem;
+    height: 0.9rem;
+    line-height: 0.9rem;
+    background-color: #f5f5f5;
+
+    .ipt {
+        width: 100%;
+        background-color: #fff;
+        text-align: center;
+        color: #666;
+        height: 0.5rem;
+        line-height: 0.5rem;
+        box-sizing: border-box;
+        padding: 0 0.2rem;
+    }
+
+    .search_content {
+        overflow: hidden;
+        position: absolute;
+        z-index: 1;
+        top: 1.62rem;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #f5f5f5;
+        padding: 0 0.2rem;
+        box-sizing: border-box;
+    }
+}
+</style>
+```
+
 以上就完成了城市选择页的搜索内容，最后记得提交代码。
+
+
+
