@@ -1,7 +1,7 @@
 <template>
 <div class="alp_list">
     <div class="ul">
-        <div class="li" :ref="item" v-for="item of letters" :key="item" @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchendå="handleTouchEnd" @click="handleAlpClick">{{item}}</div>
+        <div class="li" :ref="item" v-for="item of letters" :key="item" @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd" @click="handleAlpClick">{{item}}</div>
     </div>
 </div>
 </template>
@@ -44,7 +44,10 @@ export default {
                     clearTimeout;
                 }
                 this.timer = setTimeout(() => {
+
                     const touchY = e.touches[0].clientY - 81;
+                    console.log(touchY);
+                    console.log(this.startY);
                     const index = Math.floor((touchY - this.startY) / 22);
                     if (index >= 0 && index < this.letters.length) {
                         this.$emit("change", this.letters[index]);
