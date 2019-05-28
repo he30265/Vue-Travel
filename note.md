@@ -1051,3 +1051,54 @@ export default {
 
 
 
+
+### 九、使用 Vuex 实现数据共享
+
+这一章，我们使用 Vuex 来实现首页和城市页的数据共享。先创建一个分支 city-vuex 并切换到这个分支，进行开发。
+
+先来看一下项目中现有组件的一个目录结构：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-5d961c981efae360.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+我们现在要实现的的是 City.vue 和 Home.vue 组件之间的通信，之前讲过我们可以通过 bus 总线的方式来实现非父组件的通信，但是这种会比较麻烦，我们换一种方式，使用 Vue 官方推荐的数据框架 Vuex，下图是官网上的一个 Vuex 的图解：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-adf8f06c55150a44.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+Vuex 可以进行多个页面复杂的传值，接下来我们看一下如何在项目中使用 Vuex。首先通过 npm install 安装 vuex：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-1cdf178a006aa2a9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+然后在项目中引入 vuex，之前我们在安装插件的时候，都是在 src/main.js 中引入并通过 Vue.use() 来使用的，但是因为 vuex c处理的数据可能会比较复杂，所以我们在 src 目录下新建一个 store 目录，并在里面新建一个 index.js，在这里去引入 vuex 并使用：
+
+src/stroe/index.js
+```
+import Vue from "vue";
+import Vuex from "vuex";
+Vue.use(Vuex);
+export default new Vuex.Store({
+    state: {
+        city: "北京"
+    }
+})
+```
+
+接着打开 src/main.js，这个时候就可以通过 import 直接引入 src/stroe/index.js 了，然后在下面的 vue 实例中添加 stroe 这个属性。此时运行一下项目，如果没有报错，就说明引用成功。
+
+打开 home/Home.vue，之前首页 header 部分右侧的城市数据是父组件通过 ajax 请求到 static/mock/index.json 中的 city 数据，然后通过属性的方式把这个数据传给子组件 header.vue，子组件 header.vue 再通过 props 接收，最后渲染到页面上。现在我们不用这种方式获取数据并渲染了，把 Home.vue 中 home-header、data、getHomeInfoSucc() 中的 city 都去掉，然后打开 home/header.vue，修改一下之前的插值表达式，将之前 {{this.city}} 修改为：
+```
+{{this.$store.state.city}}
+```
+
+因为我们在 stroe/index.js 下将数据存到了 state 中，所以直接通过state.city 获取到 city 的数据。这个时候打开页面，就可以看到“北京”正常渲染到头部右侧了。我们把人们城市中之前写死的“北京”也换成这种方式来渲染。
+
+下面我们在实现一个功能，就是点击城市列表页下面的“热门城市”，他会显示到当前城市中。也就是我们要改变那张图中的 state，首先得调用 actions，然后再调用 mutations，下面我们走一下这个流程
+
+我们给每一个热门城市绑定一个点击事件 handleCityClick，并把 item.name 传进来，然后将这个方法写在 methods 中，他接收一个 city，这个 city 就是被点击的城市。在这个组件里，我要调用 vuex 中的 actions，看那张图，有一个 dispatch 的方法，我们在调用 actions 的时候，一定要调用 dispatch 这个方法，所以在这个 handleCityClick 方法中这么写：当改变 city 的时候，通过 dispath 去触发一个 changeCity 的一个 actions，将 city 作为第二个参数传过来。意思是派发一个名字是 changeCity 的 actions，然后把 city 传过去。当然这么写是没有效果的，因为在创建 store 的时候只有一个 city，并没有任何的 actions，所以打开 store/index.js，写一个 actions 对象，他这里需要有一个 dispatch 中名字一样的 actions，也就是 changeCity，这个方法接收两个参数，第一个参数是一个上下文 ctx，第二个也就是传递过来的数据，就是那个 city。当你点击城市的时候，actions 会被派发，store/index.js 这里正好对应的 actions 接收到传递过来的 city。
+
+此时 actions 中已经接收到传递过来的城市，他需要调用 mutations 来改变 state（公用的数据），所以接下来要创建一个 mutations，这里也可以写一个 changeCity，每一个 mutations 对应的参数也会有两个，第一个是 state，第二个是外部传过来的 city。我想 actions 去调用 mutations，那如何去掉用呢？看一下图，actions 如果想调用 mutations，必须执行一个方法 commit，那就在 actions 中执行一个下这个方法，之所以 actions 中第一个参数是 ctx，作用就是他可以借助 ctx 帮助我们拿到 commit这个方法，然后去执行 changeCity 这个 mutations，传过去一个内容是 city。然后在 mutations 中做一个事情，state 指的是所有公用的数据，让这个数据等于 city 就可以了。
+
+此时，打开页面，点击热门城市，当前城市就会变换了。
+
+其实这一块组件直接调用 mutations 就可以了，不用调用 actions，我们把 actions 部分注释掉，然后去 city/list.vue 中，可以不通过 dispath 调用 actions，而通过 commit 方法直接调用 mutations 了，回到页面上，可以看到是没有任何问题的。
+
+还有几处也要实现一下这样的效果，点击下边的城市列表，也可以更新当前城市，那么就在 city/list.vue 中给城市列表也加一个点击事件，需要注意的是，这里穿的是 city.name，而不是 item.name，注意循环的变量。回到页面，可以看到也没有问题。

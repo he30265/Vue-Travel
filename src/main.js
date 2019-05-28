@@ -10,6 +10,7 @@ import "style/border.css";
 import "style/iconfont.css";
 import VueAwesomeSwiper from "vue-awesome-swiper";
 import "swiper/dist/css/swiper.css";
+import store from "./store/"
 
 Vue.config.productionTip = false;
 
@@ -21,6 +22,7 @@ Vue.use(VueAwesomeSwiper /* { default global options } */);
 new Vue({
     el: "#app",
     router,
+    store,
     components: { App },
     template: "<App/>"
 });
