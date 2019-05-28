@@ -40,13 +40,11 @@ export default {
     },
     mounted() {
         this.scroll = new BScroll(this.$refs.wrapper);
-        console.log(this.scroll)
     },
     watch: {
         letter() {
             if (this.letter) {
                 const element = this.$refs[this.letter][0];
-                console.log(this.$refs)
                 this.scroll.scrollToElement(element);
             }
         }

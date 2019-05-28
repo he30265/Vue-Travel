@@ -916,3 +916,28 @@ export default {
 ```
 
 以上就完成了列表切换性能优化，记得提交代码合并分支。
+
+
+
+
+### 八、搜索功能实现
+
+打开 city 目录中 search 这个组件，新建一个列表的区块 search_content，让这个区块展示搜索的内容，此时他和 input 框是同级，所以需要在这两个元素外再包裹一层，然后给 search_content 一个样式布局，让他绝对定位到搜索框下。
+
+完成基本的样式布局后，我们来实现一些逻辑，首先要把 input 框里的内容和我的数据做一个绑定，所以在 data 中返回一个 keyword，默认为空，通过 v-model 实现一个数据的双向绑定。然后 search.vue 这个组件还要接收 City.vue 传过来的 cities 数据，所以在 City.vue 中的模板 city-search 里通过属性的方式传一个 cities，接着回到 search.vue 中，通过 props 接收父组件传过来的 cities。再到 data 中返回一个 list 数组，默认为空。
+
+写一个侦听器 watch，在里边监听 keyword 的改变，这里还是使用截流的方式来实现，先在 data 中定义一个 timer，默认值为 null，然后在监听 keyword 的方法中，判断，当 timer 为 null 时，清除这个定时器。下面写这个定时器的方法，当延时 100ms 的时候，箭头函数会被执行。先定义一个 result 变量，默认为空数组，然后通过 for 循环出 cities 中的每一项，再将 cities 中的每一项通过 forEach 遍历出来。forEach 中传一个箭头函数，这个函数接收一个 value，可以打印 value 看一下，他里面有一个 name 和 spell 值，我们可以通过判断这两个值中是否有输入的 keyeord 匹配的值，也就是如果从 name 和 spell 中能搜索到关键词，我们就把这一项添加到 result 中，然后让 data 中的 list 等于 result。
+
+得到和输入相匹配的数据后，就可以通过 v-for 将他们渲染出来了。这个时候，基本的业务逻辑就编写完成了，打开页面，输入城市的中文或字母，下面就会展示出匹配的城市：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-4dff7e4c67ab1672.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+接下来子再通过 better-scrool 来实现一个下拉效果，首先引入 better-scroll，然后在钩子函数 mounted 中创建一个 better-scroll 实例，通过 ref 将 search_content 元素传入到这个实例中，这样就实现了一个下拉的效果。
+
+最后再做一些细节上的处理，首先在输入框输入内容后，再清除掉，下边之前匹配出的城市依然存在，这个时候，只需要判断一下，当 keyword 值为空的时候，就让这个 list 为空，下边的列表也就不显示了。
+
+当输入一个不匹配的字符串，此时下面是什么都不显示的，我们可以通过 v-show 做一个没有匹配项的提示，在 li 标签下添加一份 li 标签，通过 v-show 判断一下，当 list 中没有数据时，显示这个元素。可以直接将 js 的逻辑的运算 !list.length 放到 v-show 中，但是建议还是不要在指令中添加逻辑运算，我们可以使用 computed 计算属性，设置这个值，模板里面尽量保持简洁的语法。
+
+先在，页面上始终都会显示这个查询结果元素，他把下面的元素都覆盖掉了，现在来解决一下这个问题。我们可以让 search_content 这个元素的显示与否通过一个变量来决定，v-show="keyword"，意思是，当有这个 keyword 的时候，才显示 search_content 查询结果的元素。
+
+以上就完成了城市选择页的搜索内容，最后记得提交代码。
