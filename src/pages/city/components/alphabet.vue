@@ -44,7 +44,6 @@ export default {
                     clearTimeout;
                 }
                 this.timer = setTimeout(() => {
-
                     const touchY = e.touches[0].clientY - 81;
                     const index = Math.floor((touchY - this.startY) / 22);
                     if (index >= 0 && index < this.letters.length) {
