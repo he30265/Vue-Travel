@@ -922,11 +922,13 @@ export default {
 
 ### 八、搜索功能实现
 
-打开 city 目录中 search 这个组件，新建一个列表的区块 search_content，让这个区块展示搜索的内容，此时他和 input 框是同级，所以需要在这两个元素外再包裹一层，然后给 search_content 一个样式布局，让他绝对定位到搜索框下。
+打开 city 目录中 search.vue 这个组件，新建一个列表的区块 search-content，让这个区块展示搜索的内容，此时他和 input 框是同级，所以需要在这两个元素外再包裹一层，然后给 search-content 一个样式布局，让他绝对定位到搜索框下，这是为了之后调用 better-scroll 这个插件。
 
-完成基本的样式布局后，我们来实现一些逻辑，首先要把 input 框里的内容和我的数据做一个绑定，所以在 data 中返回一个 keyword，默认为空，通过 v-model 实现一个数据的双向绑定。然后 search.vue 这个组件还要接收 City.vue 传过来的 cities 数据，所以在 City.vue 中的模板 city-search 里通过属性的方式传一个 cities，接着回到 search.vue 中，通过 props 接收父组件传过来的 cities。再到 data 中返回一个 list 数组，默认为空。
+完成基本的样式布局后，我们来实现一些逻辑，首先要把 input 框里的内容和我的数据做一个绑定，所以在 data 中返回一个 keyword，默认为空，通过 v-model 实现一个数据的双向绑定。然后 search.vue 这个组件还要接收 City.vue 传过来的 cities 数据，所以在 City.vue 中的模板 city-search 里通过属性的方式传一个 cities，接着回到 search.vue 中，通过 props 接收父组件传过来的 cities。再到 data 中返回一个 list 数组，这个 list 数组用来存放和输入相匹配的结果项，默认为空。
 
-写一个侦听器 watch，在里边监听 keyword 的改变，这里还是使用截流的方式来实现，先在 data 中定义一个 timer，默认值为 null，然后在监听 keyword 的方法中，判断，当 timer 为 null 时，清除这个定时器。下面写这个定时器的方法，当延时 100ms 的时候，箭头函数会被执行。先定义一个 result 变量，默认为空数组，然后通过 for 循环出 cities 中的每一项，再将 cities 中的每一项通过 forEach 遍历出来。forEach 中传一个箭头函数，这个函数接收一个 value，可以打印 value 看一下，他里面有一个 name 和 spell 值，我们可以通过判断这两个值中是否有输入的 keyeord 匹配的值，也就是如果从 name 和 spell 中能搜索到关键词，我们就把这一项添加到 result 中，然后让 data 中的 list 等于 result。
+写一个侦听器 watch，在里边监听 keyword 的改变，这里还是使用节流的方式来实现，先在 data 中定义一个 timer 定时器，默认值为 null，然后在监听 keyword 的方法中，判断，当 timer 为 null 时，清除这个定时器。下面写这个定时器的方法，当延时 100ms 的时候，箭头函数会被执行。先定义一个 result 变量，默认为空数组，然后通过 for 循环出 cities 中的每一项，再将 cities 中的每一项通过 forEach 遍历出来。forEach 中传一个箭头函数，这个函数接收一个 value，可以打印 value 看一下，他里面有一个 name 和 spell 值，我们可以通过判断这两个值中是否有输入的 keyeord 匹配的值，也就是如果从 name 和 spell 中能搜索到关键词，我们就把这一项添加到 result 中，然后让 data 中的 list 等于 result。
+
+**知识点补充1：上边我们先用 for in 循环了 this.cities，这是因为 this.cities 他是一个对象，所以用 for in 来循环，for in 循环出的是 key，如果想取到 key 对应的的值，就要在后面跟上索引。然后再将循环出的值通过 forEach() 来循环，forEach() 来遍历数组，里面可以传一个方法。**
 
 得到和输入相匹配的数据后，就可以通过 v-for 将他们渲染出来了。这个时候，基本的业务逻辑就编写完成了，打开页面，输入城市的中文或字母，下面就会展示出匹配的城市：
 
@@ -938,7 +940,7 @@ export default {
 
 当输入一个不匹配的字符串，此时下面是什么都不显示的，我们可以通过 v-show 做一个没有匹配项的提示，在 li 标签下添加一份 li 标签，通过 v-show 判断一下，当 list 中没有数据时，显示这个元素。可以直接将 js 的逻辑的运算 !list.length 放到 v-show 中，但是建议还是不要在指令中添加逻辑运算，我们可以使用 computed 计算属性，设置这个值，模板里面尽量保持简洁的语法。
 
-先在，页面上始终都会显示这个查询结果元素，他把下面的元素都覆盖掉了，现在来解决一下这个问题。我们可以让 search_content 这个元素的显示与否通过一个变量来决定，v-show="keyword"，意思是，当有这个 keyword 的时候，才显示 search_content 查询结果的元素。
+现在，页面上始终都会显示这个查询结果元素，他把下面的元素都覆盖掉了，来解决一下这个问题。我们可以让 search_content 这个元素的显示与否通过一个变量来决定，v-show="keyword"，意思是，当有这个 keyword 的时候，才显示 search_content 查询结果的元素。
 
 附上最终的 search.vue 的代码：
 
@@ -1060,7 +1062,7 @@ export default {
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-5d961c981efae360.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-我们现在要实现的的是 City.vue 和 Home.vue 组件之间的通信，之前讲过我们可以通过 bus 总线的方式来实现非父组件的通信，但是这种会比较麻烦，我们换一种方式，使用 Vue 官方推荐的数据框架 Vuex，下图是官网上的一个 Vuex 的图解：
+我们现在要实现的的是 City.vue 和 Home.vue 组件之间的通信，之前讲过我们可以通过 bus 总线的方式来实现非父子组件的通信，但是这种会比较麻烦，我们换一种方式，使用 Vue 官方推荐的数据框架 Vuex，下图是官网上的一个 Vuex 的图解：
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-adf8f06c55150a44.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -1068,7 +1070,7 @@ Vuex 可以进行多个页面复杂的传值，接下来我们看一下如何在
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-1cdf178a006aa2a9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-然后在项目中引入 vuex，之前我们在安装插件的时候，都是在 src/main.js 中引入并通过 Vue.use() 来使用的，但是因为 vuex c处理的数据可能会比较复杂，所以我们在 src 目录下新建一个 store 目录，并在里面新建一个 index.js，在这里去引入 vuex 并使用：
+然后在项目中引入 vuex，之前我们在安装插件的时候，都是在 src/main.js 中引入并通过 Vue.use() 来使用的，但是因为 vuex 处理的数据可能会比较复杂，所以我们在 src 目录下新建一个 store 目录，并在里面新建一个 index.js，在这里去引入 vue 和 vuex 并使用：
 
 src/stroe/index.js
 ```
@@ -1082,23 +1084,48 @@ export default new Vuex.Store({
 })
 ```
 
+state 这个对象里边存放的就是公用的数据。
+
 接着打开 src/main.js，这个时候就可以通过 import 直接引入 src/stroe/index.js 了，然后在下面的 vue 实例中添加 stroe 这个属性。此时运行一下项目，如果没有报错，就说明引用成功。
+
+src/main.js
+```
+import store from "./store"
+new Vue({
+    el: "#app",
+    router,
+    store,
+    components: { App },
+    template: "<App/>"
+});
+```
 
 打开 home/Home.vue，之前首页 header 部分右侧的城市数据是父组件通过 ajax 请求到 static/mock/index.json 中的 city 数据，然后通过属性的方式把这个数据传给子组件 header.vue，子组件 header.vue 再通过 props 接收，最后渲染到页面上。现在我们不用这种方式获取数据并渲染了，把 Home.vue 中 home-header、data、getHomeInfoSucc() 中的 city 都去掉，然后打开 home/header.vue，修改一下之前的插值表达式，将之前 {{this.city}} 修改为：
 ```
 {{this.$store.state.city}}
 ```
 
-因为我们在 stroe/index.js 下将数据存到了 state 中，所以直接通过state.city 获取到 city 的数据。这个时候打开页面，就可以看到“北京”正常渲染到头部右侧了。我们把人们城市中之前写死的“北京”也换成这种方式来渲染。
+因为我们在 stroe/index.js 下将数据存到了 State 中，所以直接通过state.city 就能获取到 city 的数据。这个时候打开页面，就可以看到“北京”正常渲染到头部右侧了。我们把城市列表页头部中的“当前城市”之前写死的“北京”也换成这种方式来渲染。
 
-下面我们在实现一个功能，就是点击城市列表页下面的“热门城市”，他会显示到当前城市中。也就是我们要改变那张图中的 state，首先得调用 actions，然后再调用 mutations，下面我们走一下这个流程
+下面我们在实现一个功能，就是点击城市列表页下面的“热门城市”，他会显示到当前城市中。也就是我们要改变那张图中的 State，看一下图中绿色虚线框圈出的内容，首先得调用 Actions，然后再调用 Mutations，下面我们走一下这个流程：
 
-我们给每一个热门城市绑定一个点击事件 handleCityClick，并把 item.name 传进来，然后将这个方法写在 methods 中，他接收一个 city，这个 city 就是被点击的城市。在这个组件里，我要调用 vuex 中的 actions，看那张图，有一个 dispatch 的方法，我们在调用 actions 的时候，一定要调用 dispatch 这个方法，所以在这个 handleCityClick 方法中这么写：当改变 city 的时候，通过 dispath 去触发一个 changeCity 的一个 actions，将 city 作为第二个参数传过来。意思是派发一个名字是 changeCity 的 actions，然后把 city 传过去。当然这么写是没有效果的，因为在创建 store 的时候只有一个 city，并没有任何的 actions，所以打开 store/index.js，写一个 actions 对象，他这里需要有一个 dispatch 中名字一样的 actions，也就是 changeCity，这个方法接收两个参数，第一个参数是一个上下文 ctx，第二个也就是传递过来的数据，就是那个 city。当你点击城市的时候，actions 会被派发，store/index.js 这里正好对应的 actions 接收到传递过来的 city。
+我们给每一个热门城市绑定一个点击事件 handleCityClick，并把 item.name 传进来，然后将这个方法写在 methods 中，他接收一个 city，这个 city 就是被点击的城市。
 
-此时 actions 中已经接收到传递过来的城市，他需要调用 mutations 来改变 state（公用的数据），所以接下来要创建一个 mutations，这里也可以写一个 changeCity，每一个 mutations 对应的参数也会有两个，第一个是 state，第二个是外部传过来的 city。我想 actions 去调用 mutations，那如何去掉用呢？看一下图，actions 如果想调用 mutations，必须执行一个方法 commit，那就在 actions 中执行一个下这个方法，之所以 actions 中第一个参数是 ctx，作用就是他可以借助 ctx 帮助我们拿到 commit这个方法，然后去执行 changeCity 这个 mutations，传过去一个内容是 city。然后在 mutations 中做一个事情，state 指的是所有公用的数据，让这个数据等于 city 就可以了。
+现在我们已经获取到被点击的城市名了，接下来，在这个组件里，我要调用 vuex 中的 Actions，看那张图，有一个 Dispatch 的方法，我们在调用 Actions 的时候，一定要调用 Dispatch 这个方法，所以在这个 handleCityClick 方法中这么写：当改变 city 的时候，通过 Dispath 去触发一个 changeCity 的一个 Actions 的行动，将 city 作为第二个参数传过来。
+```
+methods :{
+    handleCityClick(city){
+        this.$store.dispatch(changeClick,city);
+    }
+}
+```
+
+Dispatch 的意思是派发一个名字是 changeCity 的 Actions 行动，然后把 city 传过去。当然这么写是没有效果的，因为在创建 store 的时候只有一个 city，并没有任何的 Actions，所以打开 store/index.js，写一个 actions 对象，他这里需要有一个 Dispatch 中名字一样的 Actions，也就是 changeCity，这个方法接收两个参数，第一个参数是一个上下文 ctx，第二个也就是传递过来的数据，就是那个 city。当你点击城市的时候，actions 会被派发，store/index.js 这里正好对应的 Actions 接收到传递过来的 city。
+
+此时 Actions 中已经接收到传递过来的城市，他需要调用 Mutations 来改变 State（公用的数据），所以接下来要创建一个 Mutations，这里也可以写一个 changeCity，每一个 mutations 对应的参数也会有两个，第一个是 state，第二个是外部传过来的 city。我想 Actions 去调用 Mutations，那如何去调用呢？看一下图，Actions 如果想调用 Mutations，必须执行一个方法 Commit，那就在 actions 中执行一个下这个方法，之所以 Actions 中第一个参数是 ctx，作用就是他可以借助 ctx 帮助我们拿到 Commit 这个方法，然后去执行 changeCity 这个 Mutations，传过去一个内容是 city。然后在 Mutations 中做一个事情，State 指的是所有公用的数据，让这个数据等于 city 就可以了。
 
 此时，打开页面，点击热门城市，当前城市就会变换了。
 
-其实这一块组件直接调用 mutations 就可以了，不用调用 actions，我们把 actions 部分注释掉，然后去 city/list.vue 中，可以不通过 dispath 调用 actions，而通过 commit 方法直接调用 mutations 了，回到页面上，可以看到是没有任何问题的。
+其实这一块组件直接调用 Mutations 就可以了，跳过调用 Actions，我们把 Actions 部分注释掉，然后去 city/list.vue 中，可以不通过 Dispatch 调用 Actions，而通过 Commit 方法直接调用 Mutations 了，回到页面上，可以看到是没有任何问题的。
 
-还有几处也要实现一下这样的效果，点击下边的城市列表，也可以更新当前城市，那么就在 city/list.vue 中给城市列表也加一个点击事件，需要注意的是，这里穿的是 city.name，而不是 item.name，注意循环的变量。回到页面，可以看到也没有问题。
+还有几处也要实现一下这样的效果，点击下边的城市列表，也可以更新当前城市，那么就在 city/list.vue 中给城市列表也加一个点击事件，需要注意的是，这里传的是 city.name，而不是 item.name，注意循环的变量。回到页面，可以看到也没有问题。

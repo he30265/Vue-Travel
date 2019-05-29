@@ -2,7 +2,7 @@
 <div class="search">
     <div>
         <input class="ipt" type="text" placeholder="输入城市名或拼音" v-model="keyword">
-        <div class="search_content" ref="search" v-show="keyword">
+        <div class="search-content" ref="search" v-show="keyword">
             <ul>
                 <li class="border-bottom" v-for="item of list" :key="item.id">{{item.name}}</li>
                 <li class="border-bottom" v-show="hasNoData">没有找到匹配数据</li>
@@ -84,7 +84,7 @@ export default {
         padding: 0 0.2rem;
     }
 
-    .search_content {
+    .search-content {
         overflow: hidden;
         position: absolute;
         z-index: 1;
