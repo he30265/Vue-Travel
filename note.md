@@ -1126,6 +1126,245 @@ Dispatch 的意思是派发一个名字是 changeCity 的 Actions 行动，然�
 
 此时，打开页面，点击热门城市，当前城市就会变换了。
 
-其实这一块组件直接调用 Mutations 就可以了，跳过调用 Actions，我们把 Actions 部分注释掉，然后去 city/list.vue 中，可以不通过 Dispatch 调用 Actions，而通过 Commit 方法直接调用 Mutations 了，回到页面上，可以看到是没有任何问题的。
+在刚才改变 state 的这个过程，并没有任何的异步操作，而且这个操作也非常的简单，不是一些批量的操作，其实这一块组件直接调用 Mutations 就可以了，跳过调用 Actions，我们把 Actions 部分注释掉，然后去 city/list.vue 中，可以不通过 Dispatch 调用 Actions，而通过 Commit 方法直接调用 Mutations 了，回到页面上，可以看到是没有任何问题的。
 
 还有几处也要实现一下这样的效果，点击下边的城市列表，也可以更新当前城市，那么就在 city/list.vue 中给城市列表也加一个点击事件，需要注意的是，这里传的是 city.name，而不是 item.name，注意循环的变量。回到页面，可以看到也没有问题。
+
+然后是城市搜索，点击搜索结果中的城市，也可以改变当前城市，所以打开 search.vue 这个组件，将 list.vue 中的 handleCityClick 方法复制一份到 search.vue 中，给查询出的结果项绑定一个 handleCityClick 就行了。
+
+最后，我们还需要实现一个效果，就是点击了城市，能让他自动返回到首页。这一块讲解一下路由的知识，打开 Vue.js 的官网，在生态系统中找到 Vue Router，里边有一个编程式导航。在网页上，我们做页面跳转有两种方式，一种是通过 a 标签的形式，另一种是通过 js window.location.href 这种形式来做页面的跳转。在 Vue 中一样，我么可以通过 router-link 标签的形式进行页面的跳转，也可以通过 js 的形式进行页面的跳转，但是，他的 js 跳转不同于我们之前的 window.location.href 形式的跳转，在 Vue 只能够他用的是编程式导航的形式，编程式导航中给我们提供了一个 .push() 方法，就是帮助我们做页面跳转的，到代码中看一下怎么来用，打开 list.vue，在 handleCityClick 这个方法在，我们使用编程式导航这种方式，在城市改变后，让页面跳转到首页，因为我们的项目使用了 vue-router，所以每一个组件里都有 router 这样一个实例属性，这个实例属性上面呆了一个方法就叫做 push，通过这个方法就可以做页面的跳转，想跳到那一页，就在 push() 中添加哪一页的地址：
+```
+methods:{
+    handleCityClick(city){
+        this.$store.commit("changeCity",city);
+        this.$router.push("/");
+    }
+}
+```
+
+list.vue 改好了之后，search.vue 也加一下 router.push。打开页面，可以看到点击选择城市后，自动跳转到了首页，而且首页右上角显示的就是你选择的城市，这个时候，两个页面的联动就做完了。
+
+
+
+### 十、Vuex 的高级使用及 localStorage
+
+这一章讲解一些稍微高级的 Vuex 的 api 的使用，同时讲解一下 localStorage 这个本地存储的内容。
+
+上一章，我们在 src 目录下新建了一个 store 目录，这里存储了 Vuex 中的默认数据，city 设置成了北京，其实这样去写，是有问题的，点击城市，会改变这个 city，但是当页面刷新了，就又变回了北京。在真实的网站中，如果你这次选中了一个城市，下次再打开这个网页的时候，上次选的城市还应该在的，怎么解决这个问题呢？我们需要引入一个新的概念，叫做 localStorage，HTML5 中提供了一个新的 api，叫做 localStorage，它可以帮助我们实现类似与 cookie 的功能，做到本地存储，他的 api 要比 cookie 更加的简单，所以这里我们使用 localStorage 实现保存城市的功能。
+
+打开 store/index.js，我们这样去写，当用户尝试去改变城市的时候，我不但把 state 中的 city 该了，同时还去存一个 localStorage，直接写 localStorage.city = city 就可以了。然后让 stare 中 city 的默认值是 localStorage.city || "北京"，就可以了。也就是 city 的值我默认先去 localStorage 中取，如果取不到，才用默认的 “北京”。
+
+store/index.js
+```
+import Vue from "vue";
+import Vuex from "vuex";
+Vue.use(Vuex);
+export default new Vuex.Store({
+    state: {
+        city: localStorage.city || "北京"
+    },
+    mutations: {
+        changeCity(state, city) {
+            state.city = city;
+            localStorage.city = city;
+        }
+    }
+})
+```
+
+这个时候打开页面，我们选择一个城市，然后刷新页面，可以看到上次选择饿城市还在。但是当使用 localStorage 的时候，建议在外层包裹一个 try{}catch(e){}，因为在某些浏览器，如果用户关闭了本地存储这样的功能，或者使用隐身模式，使用 localStorage 可能导致浏览器直接抛出异常，代码就运行不了了，为了避免这种问题，建议在外层加一个 try{}catch(e){}，怎么加呢？
+
+先定义一个默认的 defaultCity 等于“北京”，然后写一个 try{}catch(e){}，这样写：如果有 localStorage.city，default.city 就等于 localStorage.city，下边 state 中的 city 就可以等于 defaultCity 了，同样在 mutations 的 changeCity 中也要写一个 try{}catch(e)：
+
+store/index.js
+```
+import Vue from "vue";
+import Vuex from "vuex";
+Vue.use(Vuex);
+
+let defaultCity = "北京"
+try {
+    if (localStorage.city) {
+        defaultCity = localStorage.city;
+    }
+} catch (e) { }
+
+export default new Vuex.Store({
+    state: {
+        city: defaultCity
+    },
+    mutations: {
+        changeCity(state, city) {
+            state.city = city;
+            try {
+                localStorage.city = city;
+            } catch (e) { }
+        }
+    }
+})
+```
+
+现在我们看到 store/index.js 这个文件慢慢的变得复杂起来了，实际上，在真正的项目开发和之中，会做进一步的拆分，在 store 中创建一个文件叫 state.js，然后把：
+```
+let defaultCity = "北京"
+try {
+    if (localStorage.city) {
+        defaultCity = localStorage.city;
+    }
+} catch (e) { }
+```
+这块代码放进去，然后把 state 中的代码也拿到 state.js 中：
+```
+let defaultCity = "北京"
+try {
+    if (localStorage.city) {
+        defaultCity = localStorage.city;
+    }
+} catch (e) { }
+
+export default {
+    city: defaultCity
+}
+```
+
+接下来，只需要在 index.js 中 import state 就可以了：
+```
+import Vue from "vue";
+import Vuex from "vuex";
+import state from "./state";
+Vue.use(Vuex);
+
+export default new Vuex.Store({
+    state: state,
+    mutations: {
+        changeCity(state, city) {
+            state.city = city;
+            try {
+                localStorage.city = city;
+            } catch (e) { }
+        }
+    }
+})
+```
+
+接着，我再在 store 目录下创建一个文件，叫做 mutations.js，然后把 index.js 中的 mutations 里的代码剪切进去：
+```
+export default {
+    changeCity(state, city) {
+        state.city = city;
+        try {
+            localStorage.city = city;
+        } catch (e) { }
+    }
+}
+```
+
+最终 index.js 就变成了这样：
+```
+import Vue from "vue";
+import Vuex from "vuex";
+import state from "./state";
+import mutations from "./mutations";
+Vue.use(Vuex);
+
+export default new Vuex.Store({
+    state: state,
+    mutations: mutations
+})
+```
+
+这样，我们就将 vuex 的代码拆分成了几个部分，未来他的维护性也会得到比较大的提高。
+
+最后我们对 vuex 的使用做一个优化，对 pages/home/header.vue 进行一个优化，可以看到之前使用公用数据的时候，需要写 {{this.$store.state.city}} 一长串内容，vuex 给我们一个比较高级的 api，我们可以这样去写代码：
+```
+import {mapState} from "vuex";
+```
+
+之后来一个计算属性，在计算属性中用一个展开运算符：
+```
+import {mapState} from "vuex";
+export default {
+  name: "HomeHeader",
+  computed :{
+    ...mapState(['city'])
+  }
+};
+```
+里面可以写一个数组，mapState 是指，我把 vuex 里面的数据映射到我这个组件的 computed 中，我把 city 这个公用数据映射到我的一个名字叫做 city 的计算属性之中，做好这个映射之后，上面就不用写这么麻烦了，把 {{this.$store.state.city}} 改为 this.city 就可以了。
+
+下面我们再去城市选择页做一个修改，
+
+```
+import {mapState} from 'vuex';
+```
+
+然后再写一个计算属性，刚才我们在展开运算符中传入的是一个数组，这回我们传一个对象：
+```
+// ...
+computed:{
+    ...mapState({
+        currentCity : city
+    })
+}
+// ...
+```
+
+他的意思就是，我想把 vuex 里的 city 这个公用的数据映射到我这个组件的计算属性里，映射过来的名字叫做 currentCity，如果这么写的话，上面的当前城市就可以改为 {this.currentCity}。
+
+再改一下下面的城市列表，在 methods 中，当我点击城市按钮的时候，会派发一个 Mutations，vuex 同样给我们提供了一个简便的方法，叫做 mapMutations，所以我们可以这样改一下 import：
+```
+import {mapState,mapMutations} from 'vuex';
+```
+然后在 methods 中应用 mapMutations，这里一样可以传一个数组，传一个 changeCity：
+```
+methods:{
+    handleCityClick(city){
+        // this.$store.dispatch("changeCity",city);
+        this.$store.commit("changeCity",city);
+        this.$router.push("/");
+    },
+    ...mapMutations(['changeCity'])
+}
+```
+他的意思就是，我们有一个 mapMutations 叫做 changeCity，然后我把这个 mapMutations 映射到我这个组件里一个名字叫做 changeCity 的方法里，那么如果我要调这个 mapMutations，就没必要：
+```
+this.$store.commit("changeCity",city);
+```
+这么麻烦的写了，可以直接改为 this.changeCity(city); 就行了。我们把这块 methods 中的方法复制一下，放到 search.vue 里面，记得在上面引入 mapMutations：import {mapMutations} from 'vuex'。
+
+到这里，Vue 的一些高级写法也带大家接触了。接下来，打开 Vue 的官网，打开 Vuex，可以看到他有几个核心的概念：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-e7cef2ec3eaea316.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+State 我们几经熟悉了，存放的是公用的文件，Action 我们也用过，一些一步的方法我们可以写在 Action 中，Mutation 里放的是同步的大的对数九的一些改变，接下来看一下 Getter 的作用。
+
+回到 store/index.js 中，写一个 getters，它对应的是一个对象，我们可以写一个方法，叫做 doubleCity，他会接收一个参数叫做 state，可以这样写：
+```
+getters: {
+    doubleCity(){
+        return state.city + " " + state.city;
+    }
+}
+```
+
+然后去首页上，打开 home/header.vue，这里右上角的城市我用的是 city，它显示的只是一个城市的名字，如果这里要用两个城市该怎么办呢？我们可以在 computed 下加一个 mapGetters：
+```
+import {mapState, mapGetters} from "vuex";
+export default {
+  name: "HomeHeader",
+  computed :{
+    ...mapState(['city']),
+    ...mapGetters(['doubleCity'])
+  }
+};
+```
+
+他的意思就是我们把 Vuex 里的 getters 映射到我这个组件里的一个 computed 的计算属性里，这样就可以在右上角城市位置直接使用 {{this.doubleCity}} 了，打开页面，就可以看到右上角出现了两遍的城市名。
+
+![](https://upload-images.jianshu.io/upload_images/9373308-b03e9182b61c4fd3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+那这有什么用呢？实际上，在 Vuex 中 getters 的作用有点类似于组件中的 computed 计算属性的作用，当我们需要根据 state 里面的数据算出一些新的数据的时候，我们就可以借助 getters 这样一个工具来提供新的数据，这样的话，我们可以避免数据的冗余。
+
+最后，再来看一下 Vuex 中的最后一个核心概念，叫做 Module，什么时候用到 Module 呢？当我们遇到一个非常复杂的业务场景，比如在管理后台系统的时候，经常会有很多共用的数据，在 Vuex 中进行存储，如果我们把所有的 Mutations 都放到 mutations.js 文件中，这个文件慢慢的会变得非常庞大，难以维护，这个时候，我们可以借助 Module 对一个复杂的 Mutations、State 包括 Actions 进行一个拆分，可以看一下官网的例子，他定义了几个模块，moduleA、moduleB，创建 store 的时候，可以通过模块来做 store 的创建，这样有一个好处，就是，A 模块存储和 A 模块相关的数据，以及操作就可以了，B 模块存储 B 模块对应的数据及对数据的操做，然后在创建 store 的时候，我对各个模块进行整合，通过 Modul 写我们的代码，可以是代码具有更好的可维护性。当然，目前我们的项目中只有一个 city 这样的一个共有数据，所以没有必要去使用 Module 把我们的代码进行拆分。
+
+以上就讲解了 Vuex 的高级使用及 localStorage，记得提交代码到远程仓库。
