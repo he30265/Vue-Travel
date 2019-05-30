@@ -1058,9 +1058,12 @@ export default {
 
 这一章，我们使用 Vuex 来实现首页和城市页的数据共享。先创建一个分支 city-vuex 并切换到这个分支，进行开发。
 
+
+#### 1、首页右上角“当前城市”和“城市页”当前城市的共享
+
 先来看一下项目中现有组件的一个目录结构：
 
-![](https://upload-images.jianshu.io/upload_images/9373308-5d961c981efae360.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](https://upload-images.jianshu.io/upload_images/9373308-e0bcbe846326422e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 我们现在要实现的的是 City.vue 和 Home.vue 组件之间的通信，之前讲过我们可以通过 bus 总线的方式来实现非父子组件的通信，但是这种会比较麻烦，我们换一种方式，使用 Vue 官方推荐的数据框架 Vuex，下图是官网上的一个 Vuex 的图解：
 
@@ -1084,9 +1087,9 @@ export default new Vuex.Store({
 })
 ```
 
-state 这个对象里边存放的就是公用的数据。
+state 这个对象里边存放的就是公用的数据，他对应的就是图解中的 State，组件都可以去使用这里的数据。
 
-接着打开 src/main.js，这个时候就可以通过 import 直接引入 src/stroe/index.js 了，然后在下面的 vue 实例中添加 stroe 这个属性。此时运行一下项目，如果没有报错，就说明引用成功。
+接着打开 src/main.js，这个时候就可以通过 import 直接引入 src/stroe/index.js 了，然后在下面的 vue 实例中添加 stroe 这个属性就可以了。此时运行一下项目，如果没有报错，就说明引用成功。
 
 src/main.js
 ```
@@ -1107,11 +1110,14 @@ new Vue({
 
 因为我们在 stroe/index.js 下将数据存到了 State 中，所以直接通过state.city 就能获取到 city 的数据。这个时候打开页面，就可以看到“北京”正常渲染到头部右侧了。我们把城市列表页头部中的“当前城市”之前写死的“北京”也换成这种方式来渲染。
 
-下面我们在实现一个功能，就是点击城市列表页下面的“热门城市”，他会显示到当前城市中。也就是我们要改变那张图中的 State，看一下图中绿色虚线框圈出的内容，首先得调用 Actions，然后再调用 Mutations，下面我们走一下这个流程：
 
-我们给每一个热门城市绑定一个点击事件 handleCityClick，并把 item.name 传进来，然后将这个方法写在 methods 中，他接收一个 city，这个 city 就是被点击的城市。
+#### 2、改变 State，更新当前城市
 
-现在我们已经获取到被点击的城市名了，接下来，在这个组件里，我要调用 vuex 中的 Actions，看那张图，有一个 Dispatch 的方法，我们在调用 Actions 的时候，一定要调用 Dispatch 这个方法，所以在这个 handleCityClick 方法中这么写：当改变 city 的时候，通过 Dispath 去触发一个 changeCity 的一个 Actions 的行动，将 city 作为第二个参数传过来。
+下面我们再实现一个功能，就是点击城市列表页下面的“热门城市”，他会显示到当前城市中。也就是我们要改变那张图中的 State，看一下图中绿色虚线框圈出的内容，首先得调用 Actions，然后再调用 Mutations，调用 Actions 的时候，是需要 Dispatch 方法的，调用 Mutations 的时候，是需要 Commit 方法的，下面我们走一下这个流程：
+
+在 city/list.vue 中我们给每一个热门城市绑定一个点击事件 handleCityClick，并把 item.name 传进来，然后将这个方法写在 methods 中，他接收一个 city，这个 city 就是被点击的城市。
+
+现在我们已经获取到被点击的城市名了，接下来，在这个组件里，我要调用 vuex 中的 Actions，看那张图，有一个 Dispatch 的方法，我们在调用 Actions 的时候，一定要调用 Dispatch 这个方法，所以在这个 handleCityClick 方法中这么写：当改变 city 的时候，通过 Dispath 去派发一个 changeCity 的一个 Actions 的行动，将 city 作为第二个参数传过来。
 ```
 methods :{
     handleCityClick(city){
@@ -1120,12 +1126,389 @@ methods :{
 }
 ```
 
-Dispatch 的意思是派发一个名字是 changeCity 的 Actions 行动，然后把 city 传过去。当然这么写是没有效果的，因为在创建 store 的时候只有一个 city，并没有任何的 Actions，所以打开 store/index.js，写一个 actions 对象，他这里需要有一个 Dispatch 中名字一样的 Actions，也就是 changeCity，这个方法接收两个参数，第一个参数是一个上下文 ctx，第二个也就是传递过来的数据，就是那个 city。当你点击城市的时候，actions 会被派发，store/index.js 这里正好对应的 Actions 接收到传递过来的 city。
+Dispatch 的意思是派发一个名字是 changeCity 的 Actions 行动，然后把 city 传过去。当然这么写是没有效果的，因为在创建 store 的时候只有一个 city，并没有任何的 Actions，所以打开 store/index.js，写一个 actions 对象，他这里需要有一个和 dispatch 中名字一样的 Actions，也就是 changeCity，这个方法接收两个参数，第一个参数是一个上下文 ctx，第二个也就是传递过来的数据，就是那个 city。当你点击城市的时候，actions 会被派发，store/index.js 这里正好对应的 Actions 接收到传递过来的 city。
 
-此时 Actions 中已经接收到传递过来的城市，他需要调用 Mutations 来改变 State（公用的数据），所以接下来要创建一个 Mutations，这里也可以写一个 changeCity，每一个 mutations 对应的参数也会有两个，第一个是 state，第二个是外部传过来的 city。我想 Actions 去调用 Mutations，那如何去调用呢？看一下图，Actions 如果想调用 Mutations，必须执行一个方法 Commit，那就在 actions 中执行一个下这个方法，之所以 Actions 中第一个参数是 ctx，作用就是他可以借助 ctx 帮助我们拿到 Commit 这个方法，然后去执行 changeCity 这个 Mutations，传过去一个内容是 city。然后在 Mutations 中做一个事情，State 指的是所有公用的数据，让这个数据等于 city 就可以了。
+store/index.js
+```
+actions:{
+    changeCity (ctx,city){
+    }
+},
+```
+
+此时 Actions 中已经接收到传递过来的城市，他需要调用 Mutations 来改变 State（公用的数据），看图解，Mutations 是需要 Commit 来提交的，在 city/list.vue 下的 methods 中再加一个 Commit 提交：
+
+city/list.vue
+```
+methods :{
+    handleCityClick(city){
+        this.$store.dispatch("changeCity",city); // 派发
+        this.$store.commit("changeCity",city); // 提交
+    }
+}
+```
+
+他要把这个 changeCity 和 city 提交给 Mutations，所以和在 store/index.js 中创建 actions 一样，接下来要创建一个 Mutations，这里也可以写一个 changeCity，每一个 mutations 对应的参数也会有两个，第一个是 state，第二个是外部传过来的 city。
+
+store/index.js
+```
+mutations:{
+    changeCity(state,city){
+    }
+}
+```
+
+我想 Actions 去调用 Mutations，那如何去调用呢？看一下图，Actions 如果想调用 Mutations，必须执行一个方法 Commit，那就在 actions 中执行一个下这个方法，之所以 Actions 中第一个参数是 ctx，作用就是他可以借助 ctx 帮助我们拿到 Commit 这个方法，然后去执行 changeCity 这个 Mutations，传过去一个内容是 city。然后在 Mutations 中做一个事情，State 指的是所有公用的数据，让这个数据等于 city 就可以了。
+
+store/index.js
+```
+import Vue from "vue";
+import Vuex from "vuex";
+
+Vue.use(Vuex);
+
+export default new Vuex.Store({
+    state : {
+        city:"北京"
+    },
+    actions:{
+        changeCity (ctx,city){
+            ctx.commit("changeCity",city);
+        }
+    },
+    mutations:{
+        changeCity(state,city){
+            state.city = city;
+        }
+    }
+})
+```
+
 
 此时，打开页面，点击热门城市，当前城市就会变换了。
 
-其实这一块组件直接调用 Mutations 就可以了，跳过调用 Actions，我们把 Actions 部分注释掉，然后去 city/list.vue 中，可以不通过 Dispatch 调用 Actions，而通过 Commit 方法直接调用 Mutations 了，回到页面上，可以看到是没有任何问题的。
+上面这一过程，就是图解中 State → Actions → Mutations 这一过程，其实我们也可以省去 Actions 这一步，直接 State → Mutations，接下来我们把 store/index.js 中 actions 部分注释掉，然后去 city/list.vue 中，把使用 dispath 给 actions 派发 changeCity 和 city 去掉，直接通过 commit 方法调用 mutations 就可以了。
 
-还有几处也要实现一下这样的效果，点击下边的城市列表，也可以更新当前城市，那么就在 city/list.vue 中给城市列表也加一个点击事件，需要注意的是，这里传的是 city.name，而不是 item.name，注意循环的变量。回到页面，可以看到也没有问题。
+store/index.js
+```
+import Vue from "vue";
+import Vuex from "vuex";
+
+Vue.use(Vuex);
+
+export default new Vuex.Store({
+    state : {
+        city:"北京"
+    },
+    // actions:{
+    //     changeCity (ctx,city){
+    //         ctx.commit("changeCity",city);
+    //     }
+    // },
+    mutations:{
+        changeCity(state,city){
+            state.city = city;
+        }
+    }
+})
+```
+
+city/list.vue
+```
+methods :{
+    handleCityClick(city){
+        // this.$store.dispatch("changeCity",city); // 派发
+        this.$store.commit("changeCity",city); // 提交
+    }
+}
+```
+
+回到页面上，可以看到逻辑是没有任何问题的。点击“热门城市”，“当前城市”就会改变。
+
+还有两处也要实现一下这样的效果，就是热门城市下的城市列表和搜索结果中的城市列表。打开 city/list.vue ，给城市列表也加一个点击事件，需要注意的是，这里传的是 city.name，而不是 item.name，注意循环的变量名。
+
+city/list.vue
+```
+<div class="alp_li border-bottom" v-for="city of item" :key="item.id" @click="handleCityClick(city.name)">{{city.name}}</div>
+```
+
+还有 city/search.vue，这个组件里没有 handleCityClick 这个方法，所以要在 methods 中添加一下这个方法，然后再城市列表传入点击事件。
+
+
+
+### 十、Vuex 的高级使用及 localStorage
+
+这一章讲解一些稍微高级的 Vuex 的 api 的使用，同时讲解一下 localStorage 这个本地存储的内容。
+
+上一章，我们在 src 目录下新建了一个 store 目录，这里存储了 Vuex 中的默认数据，city 设置成了北京，其实这样去写，是有问题的，点击城市，会改变这个 city，但是当页面刷新了，就又变回了北京。在真实的项目中，如果你这次选中了一个城市，下次再打开这个网页的时候，上次选的城市还应该在的，怎么解决这个问题呢？我们需要引入一个新的概念，叫做 localStorage，HTML5 中提供了一个新的 api，叫做 localStorage，它可以帮助我们实现类似与 cookie 的功能，做到本地存储，他的 api 要比 cookie 更加的简单，所以这里我们使用 localStorage 实现保存城市的功能。
+
+打开 store/index.js，我们这样去写，当用户尝试去改变城市的时候，我不但把 state 中的 city 该了，同时还去存一个 localStorage，直接写 localStorage.city = city 就可以了。然后让 stare 中 city 的默认值是 localStorage.city || "北京"，就可以了。也就是 city 的值我默认先去 localStorage 中取，如果取不到，才用默认的 “北京”。
+
+store/index.js
+```
+import Vue from "vue";
+import Vuex from "vuex";
+Vue.use(Vuex);
+export default new Vuex.Store({
+    state: {
+        city: localStorage.city || "北京"
+    },
+    mutations: {
+        changeCity(state, city) {
+            state.city = city;
+            localStorage.city = city;
+        }
+    }
+})
+```
+
+这个时候打开页面，我们选择一个城市，然后刷新页面，可以看到上次选择的城市还在。但是当使用 localStorage 的时候，建议在外层包裹一个 try{}catch(e){}，因为在某些浏览器，如果用户关闭了本地存储这样的功能，或者使用隐身模式，使用 localStorage 可能导致浏览器直接抛出异常，代码就运行不了了，为了避免这种问题，建议在外层加一个 try{}catch(e){}，怎么加呢？
+
+先定义一个默认的 defaultCity 等于“北京”，然后写一个 try{}catch(e){}，这样写：如果有 localStorage.city，default.city 就等于 localStorage.city，下边 state 中的 city 就可以等于 defaultCity 了，同样在 mutations 的 changeCity 中也要写一个 try{}catch(e)：
+
+store/index.js
+```
+import Vue from "vue";
+import Vuex from "vuex";
+Vue.use(Vuex);
+
+let defaultCity = "北京"
+try {
+    if (localStorage.city) {
+        defaultCity = localStorage.city;
+    }
+} catch (e) { }
+
+export default new Vuex.Store({
+    state: {
+        city: defaultCity
+    },
+    mutations: {
+        changeCity(state, city) {
+            state.city = city;
+            try {
+                localStorage.city = city;
+            } catch (e) { }
+        }
+    }
+})
+```
+
+现在我们看到 store/index.js 这个文件慢慢的变得复杂起来了，实际上，在真正的项目开发和之中，会做进一步的拆分，也就是把这个文件拆分为 State、Actions、Mutations，在 store 中创建一个文件叫 state.js（只存储公用数据），然后把设置数据这块代码放进去，并通过 export 导出的内容就是在 index.js 中定义的 state 对象里的内容：
+```
+let defaultCity = "北京"
+try {
+    if (localStorage.city) {
+        defaultCity = localStorage.city;
+    }
+} catch (e) { }
+export default {
+    city: defaultCity
+}
+```
+
+接下来，只需要在 index.js 中 import state 就可以了：
+```
+import Vue from "vue";
+import Vuex from "vuex";
+import state from "./state";
+Vue.use(Vuex);
+
+export default new Vuex.Store({
+    state: state,
+    mutations: {
+        changeCity(state, city) {
+            state.city = city;
+            try {
+                localStorage.city = city;
+            } catch (e) { }
+        }
+    }
+})
+```
+
+接着，我再在 store 目录下创建一个文件，叫做 mutations.js，然后把 index.js 中的 mutations 对象里的代码剪切进去：
+```
+export default {
+    changeCity(state, city) {
+        state.city = city;
+        try {
+            localStorage.city = city;
+        } catch (e) { }
+    }
+}
+```
+
+最终 index.js 就变成了这样：
+```
+import Vue from "vue";
+import Vuex from "vuex";
+import state from "./state";
+import mutations from "./mutations";
+Vue.use(Vuex);
+
+export default new Vuex.Store({
+    state: state,
+    mutations: mutations
+})
+```
+
+这样，我们就将 vuex 的代码拆分成了 State、Actions、Mutations 这几个部分，未来他的维护性也会得到比较大的提高。
+**there 作图**
+
+最后我们对 vuex 的使用做一个优化，对 pages/home/header.vue 进行一个优化，可以看到之前使用公用数据的时候，需要写 {{this.$store.state.city}} 一长串内容，vuex 给我们一个比较高级的 api，我们可以这样去写代码：
+```
+import {mapState} from "vuex";
+```
+
+之后来一个计算属性，在计算属性中用一个展开运算符：
+```
+import {mapState} from "vuex";
+export default {
+  name: "HomeHeader",
+  computed :{
+    ...mapState(['city'])
+  }
+};
+```
+里面可以写一个数组，mapState 是指，我把 vuex 里面的数据映射到我这个组件的 computed 中，我把 city 这个公用数据映射到我的一个名字叫做 city 的计算属性之中，做好这个映射之后，上面就不用写这么麻烦了，把 {{this.$store.state.city}} 改为 this.city 就可以了。
+
+下面我们再去城市选择页做一个修改，
+
+```
+import {mapState} from 'vuex';
+```
+
+然后再写一个计算属性，刚才我们在展开运算符中传入的是一个数组，这回我们传一个对象：
+```
+// ...
+computed:{
+    ...mapState({
+        currentCity : city
+    })
+}
+// ...
+```
+
+他的意思就是，我想把 vuex 里的 city 这个公用的数据映射到我这个组件的计算属性里，映射过来的名字叫做 currentCity，如果这么写的话，上面的当前城市就可以改为 {this.currentCity}。
+
+再改一下下面的城市列表，在 methods 中，当我点击城市按钮的时候，会派发一个 Mutations，vuex 同样给我们提供了一个简便的方法，叫做 mapMutations，所以我们可以这样改一下 import：
+```
+import {mapState,mapMutations} from 'vuex';
+```
+然后在 methods 中应用 mapMutations，这里一样可以传一个数组，传一个 changeCity：
+```
+methods:{
+    handleCityClick(city){
+        // this.$store.dispatch("changeCity",city);
+        this.$store.commit("changeCity",city);
+        this.$router.push("/");
+    },
+    ...mapMutations(['changeCity'])
+}
+```
+他的意思就是，我们有一个 mapMutations 叫做 changeCity，然后我把这个 mapMutations 映射到我这个组件里一个名字叫做 changeCity 的方法里，那么如果我要调这个 mapMutations，就没必要：
+```
+this.$store.commit("changeCity",city);
+```
+这么麻烦的写了，可以直接改为 this.changeCity(city); 就行了。我们把这块 methods 中的方法复制一下，放到 search.vue 里面，记得在上面引入 mapMutations：import {mapMutations} from 'vuex'。
+
+到这里，Vue 的一些高级写法也带大家接触了。接下来，打开 Vue 的官网，打开 Vuex，可以看到他有几个核心的概念：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-e7cef2ec3eaea316.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+State 我们几经熟悉了，存放的是公用的文件，Action 我们也用过，一些一步的方法我们可以写在 Action 中，Mutation 里放的是同步的大的对数九的一些改变，接下来看一下 Getter 的作用。
+
+回到 store/index.js 中，写一个 getters，它对应的是一个对象，我们可以写一个方法，叫做 doubleCity，他会接收一个参数叫做 state，可以这样写：
+```
+getters: {
+    doubleCity(){
+        return state.city + " " + state.city;
+    }
+}
+```
+
+然后去首页上，打开 home/header.vue，这里右上角的城市我用的是 city，它显示的只是一个城市的名字，如果这里要用两个城市该怎么办呢？我们可以在 computed 下加一个 mapGetters：
+```
+import {mapState, mapGetters} from "vuex";
+export default {
+  name: "HomeHeader",
+  computed :{
+    ...mapState(['city']),
+    ...mapGetters(['doubleCity'])
+  }
+};
+```
+
+他的意思就是我们把 Vuex 里的 getters 映射到我这个组件里的一个 computed 的计算属性里，这样就可以在右上角城市位置直接使用 {{this.doubleCity}} 了，打开页面，就可以看到右上角出现了两遍的城市名。
+
+![](https://upload-images.jianshu.io/upload_images/9373308-b03e9182b61c4fd3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+那这有什么用呢？实际上，在 Vuex 中 getters 的作用有点类似于组件中的 computed 计算属性的作用，当我们需要根据 state 里面的数据算出一些新的数据的时候，我们就可以借助 getters 这样一个工具来提供新的数据，这样的话，我们可以避免数据的冗余。
+
+最后，再来看一下 Vuex 中的最后一个核心概念，叫做 Module，什么时候用到 Module 呢？当我们遇到一个非常复杂的业务场景，比如在管理后台系统的时候，经常会有很多共用的数据，在 Vuex 中进行存储，如果我们把所有的 Mutations 都放到 mutations.js 文件中，这个文件慢慢的会变得非常庞大，难以维护，这个时候，我们可以借助 Module 对一个复杂的 Mutations、State 包括 Actions 进行一个拆分，可以看一下官网的例子，他定义了几个模块，moduleA、moduleB，创建 store 的时候，可以通过模块来做 store 的创建，这样有一个好处，就是，A 模块存储和 A 模块相关的数据，以及操作就可以了，B 模块存储 B 模块对应的数据及对数据的操做，然后在创建 store 的时候，我对各个模块进行整合，通过 Modul 写我们的代码，可以是代码具有更好的可维护性。当然，目前我们的项目中只有一个 city 这样的一个共有数据，所以没有必要去使用 Module 把我们的代码进行拆分。
+
+以上就讲解了 Vuex 的高级使用及 localStorage，记得提交代码到远程仓库。
+
+
+
+### 十一、使用 keep-alive 优化网页性能
+
+这一章我们学习使用 keep-alive 这个 Vue 内置的 Vue 标签来对我们已经写好的两个页面进行性能的优化，首先还是先建一个分支 city-keepalive 并切换，在这个分支上进行开发。
+
+启动项目服务，打开页面，这样看不存在什么问题，基本的一些业务逻辑都已经实现了，但是在控制台中打开 Network 网络这个选项，选择 XHR，当初次进入首页的时候，请求了一个 index.json 的文件，然后切换到列表页，又请求了一个 city.json，然后再回到首页，index.json 又请求了一次，再次去列表页，city.json 又请求了一次，也就是，没一次路由发生变化的时候，Ajax 都会重新的被发送。
+
+![](https://upload-images.jianshu.io/upload_images/9373308-f536d48e2960f553.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+我们打开代码来看一下是什么原因，打开 Home.vue 首页这个组件，每一次打开这个首页的时候，都会被重新的渲染，所以 mounted 这个钩子就会被重新的执行，那么这个 Ajax 数据就会被重新获取，那么这么能让他只获取一次呢？
+
+打开 main.js，可以看到入口组件是 App 这个组件，再打开 App.vue，router-view 显示的是当前地址所对应的内容，我们可以在外层包裹一个 keep-alive 的一个标签，他是 Vue 自带的一个标签，他的意思就是我的路由的内容被加载一次后，我就把路由中的内容放到内存之中，下一次再进入这个路由的时候，不需要重新渲染这个组件，去重新执行钩子函数，只要去内存里把以前的内容拿出来就可以，这个时候，回到页面上，再打开 Network，进入到列表页，选择城市再返回首页，就不会再去加载 index.json 了，同样再进入列表页，也不会再去加载 city.json 了，他直接会从内存中调数据，而不会重新去法 Ajax 请求了。
+
+这样还是存在逻辑上的问题的，当我在“北京”的时候，首页显示的是“北京”的内容，当切换为“上海”时，树叶就应该显示“上海”的内容，所以城市发生改变的时候，首页还需要重新发一次 Ajax 请求，我们对这一块做一个调整。
+
+打开 Home.vue 组件，改一下 axios 请求地址这里，在他的后面带一个参数，让他等于 Vuex 中存的当前的城市，所以还需要在 Home.vue 组件中引用 Vuex，import { mapState } from "vuex"，然后再加一个计算属性：
+```
+computed:{
+    ...mapState(['city'])
+}
+```
+获取到城市对应的内容，然后就可以在发 Ajax 的时候，把 city 放在请求的参数里面：
+```
+axios.get("/api/index.json?city=" + this.city).then(this.getHomeInfoSucc);
+```
+
+这个时候，我们打开页面，可以看到请求参数里已经携带了当前的城市：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-bd61b9bb9cd195b2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+但是，例如当你切换了城市“桂林”，回到首页，并没有重新发 Ajax 请求，虽然上面的城市变成了“桂林”，但是底下的内容还是“北京”的内容，我们希望底下的内容跟着变，该怎么做呢？
+
+当我们在 App.vue 中用了 keep-alive 的时候，这块的内容已经被缓存起来了，他直接取得是缓存里的数据，那如何去改变缓存里的数据呢？当你使用 keeo-alive 的时候，组件中会多出一个生命周期函数 activted，可以在 mounted 和 activated 两个生命周期函数下打印一些内容，到浏览器上看一下他俩的执行：
+```
+mounted() {
+    console.log("mounted");
+    this.getHomeInfo();
+},
+activated(){
+    console.log("activted");
+}
+```
+
+打开页面，可以看到，mounted 和 activated 都会执行，当切换了城市，再回到首页的时候，组件的 mounted 就不会执行了，就只有 activated 会被执行，那么我们借助 activated 这个生命周期函数就可以实现我们想要的功能了。
+
+首先在页面被挂载的时候，也就是 mounted 中一定会去发一个 Ajax 请求，当页面重新被显示的时候，activated 一定会被重新的执行，那么我们就可以在页面每次重新显示的时候，可以判断当前页面上的城市和上次页面上显示的城市是否是相同的，如果不相同的，就再发一次 Ajax 请求。
+
+先在 data 中设置一个数据 lastCity，默认值是空，接着当页面被挂载的时候，让他等于 this.city，对上一次的城市做一个保存，当页面被重新激活的时候，我们在 activted 中这样写：
+```
+activated(){
+    if(this.lastCity !== this.city){
+        this.getHomeInfo();
+    }
+}
+```
+
+如果上一次的城市 lastCity 不等于当前城市的时候，就重新发一个 Ajax 请求，直接调用上面 getHomeInfo 方法就可以了。当上次的 city 和这次的 city 不一样时，还需要让他等于这次的 city。回到页面上，可以看到当切换的城市和上次的城市一样时，Ajax 就不会请求 city.json 了，当不一样时，才会去请求 city.json。
+
+回到代码里面，通过 activted 这样一个 keep-alive 新增的生命周期函数，结合 lastCity 这样一个临时缓存变量，就实现了首页代码性能优化的调整。
+
+以上，关于首页和城市列表页所有功能的完整实现就做完了，最后，提交代码到分支上，然后合并到主分支。

@@ -3,18 +3,15 @@ import Vuex from "vuex";
 
 Vue.use(Vuex);
 
+import state from "./state";
+import mutations from "./mutations";
+
 export default new Vuex.Store({
-    state : {
-        city:"北京"
-    },
+    state : state,
     // actions:{
     //     changeCity (ctx,city){
     //         ctx.commit("changeCity",city);
     //     }
     // },
-    mutations:{
-        changeCity(state,city){
-            state.city = city;
-        }
-    }
+    mutations:mutations
 })

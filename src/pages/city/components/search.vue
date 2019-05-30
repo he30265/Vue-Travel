@@ -3,7 +3,7 @@
     <input v-model="keyword" class="ipt" type="text" placeholder="输入城市名或拼音">
     <div class="search-content" ref="content" v-show="keyword">
         <ul>
-            <li v-for="item of list" :key="item.id">{{item.name}}</li>
+            <li v-for="item of list" :key="item.id" @click="handleCityClick(item.name)">{{item.name}}</li>
             <li v-show="noKeyword">无匹配项</li>
         </ul>
     </div>
@@ -23,6 +23,11 @@ export default {
             list: [],
             timer: null
         };
+    },
+    methods:{
+        handleCityClick(city){
+            this.$store.commit("changeCity",city);
+        }
     },
     computed:{
         noKeyword(){

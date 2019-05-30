@@ -52,8 +52,8 @@ export default {
     },
     methods :{
         handleCityClick(city){
-            // this.$store.dispatch("changeCity",city);
-            this.$store.commit("changeCity",city);
+            // this.$store.dispatch("changeCity",city); // 派发
+            this.$store.commit("changeCity",city); // 提交
         }
     }
 };
