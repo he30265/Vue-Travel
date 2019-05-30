@@ -1431,3 +1431,545 @@ activated(){
 回到代码里面，通过 activted 这样一个 keep-alive 新增的生命周期函数，结合 lastCity 这样一个临时缓存变量，就实现了首页代码性能优化的调整。
 
 以上，关于首页和城市列表页所有功能的完整实现就做完了，最后，提交代码到分支上，然后合并到主分支。
+
+
+
+
+
+## 第八课
+
+### 一、详情页动态路由及 banner 布局
+
+这一章来看一下详情页的动态路由及 banner 布局。首选新建一个分支 detail-banner 并且切换到这个分支进行开发。
+
+首先打开 home/recommend.vue，我们把循环项改为 router-link 标签的形式，然后通过 to 给元素加路由地址，为了让每个页面的详情页地址不一样，这里我们使用动态路由，就是在 to 前面加一个冒号，地址后面跟一个 item.id 这样一个参数，这样每个详情页的地址就是动态的了，例：
+
+home/recommend.vue
+```
+<router-link class="rl_li border-bottom" v-for="item of list" :key="item.id" :to="'/detail/' + item.id">
+    <div class="a">
+        <div class="pic">
+        <img :src="item.imgUrl" alt class="img">
+        </div>
+        <div class="info">
+        <div class="tit">{{item.infoTit}}</div>
+        <div class="txt">{{item.infoTxt}}</div>
+        <div class="money">
+            <b class="b">¥</b>
+            <i class="i">{{item.infoMoney}}</i>起
+        </div>
+        </div>
+    </div>
+</router-link>
+```
+
+这个时候打开页面，点击城市，看地址栏 url 的变化，不同城市的详情页地址也不同。
+
+补充，router-link 会自动把标签渲染为 a 标签，如果不想让他渲染为 a 标签，就给他加一个 tag 属性，里边写上标签名，例如：tag="li"，意思是让这个 router-link 渲染为 li 标签。
+
+现在我们还没有进行路由的配置，接下来我们添加一个路由。首先在 pages 下新建一个 detail 目录用来存放详情页的组件，然后在 detail 目录下新建一个 Detail.vue 组件，里面编写一些内容，例：
+
+Detail.vue
+```
+<template>
+    <div>
+        detail
+    </div>
+</template>
+
+<script>
+export default {
+    name : "detail"
+}
+</script>
+
+<style lang="stylus" scoped>
+    
+</style>
+```
+
+接下来就可以去 router 中添加这个页面的路由信息了，打开 router/index.js，首先通过 import 引入 Detail.vue 这个组件，然后给他配置路由信息，这个时候我们知道了 detail 这个路径后面还要跟一个参数，所以在路径后要跟一个动态路由，在 Vue 中，通过 /路径/:id 的形式我们就写了一个动态路由，他的意思是，前面的路径必须是 /detail/，后面要带一个参数，这个参数要放在 id 这个变量里面，
+
+router/index.js
+```
+import Vue from "vue";
+import Router from "vue-router";
+import Home from "@/pages/home/Home";
+import City from "@/pages/city/City";
+import Detail from "@/pages/detail/Detail";
+
+Vue.use(Router);
+
+export default new Router({
+    routes: [
+        {
+            path: "/",
+            name: "Home",
+            component: Home
+        },{
+            path: "/city",
+            name: "City",
+            component: City
+        },
+        {
+            path: "/detail/:id",
+            name: "Detail",
+            component: Detail
+        }
+    ]
+});
+```
+
+这个时候，打开页面，点击城市，url 后面就会跟一个该城市对应的 id。下面我们先来完成详情页面的布局与样式。
+
+先来完成一下 banner 部分，在 detail 目录下新建一个 components 目录，然后在 components 目录中新建一个 banner.vue 组件。
+**改图标**
+detail/banner.vue
+```
+<template>
+<div class="banner-con">
+    <div class="banner-return">
+        <span class="iconfont">&#xe624;</span>
+    </div>
+    <div class="banner-pic">
+        <img
+        src="//img1.qunarzz.com/sight/p0/1707/e1/e13a1e819bc59b79a3.img.jpg_600x330_29b1824b.jpg"
+        alt
+      >
+    </div>
+        <div class="banner-txt">
+            <div class="bt-picnum">
+                <span class="iconfont">&#xe624;</span>3
+            </div>
+            <div class="bt-tit">涠洲岛船票</div>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    name: "DetailBanner"
+};
+</script>
+
+<style lang="stylus" scoped>
+.banner-con {
+    position: relative;
+    color: #fff;
+
+    .banner-return {
+        position: absolute;
+        top: 0.2rem;
+        left: 0.2rem;
+        width: 0.72rem;
+        height: 0.72rem;
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 50%;
+        text-align: center;
+        line-height: 0.72rem;
+    }
+
+    .banner-pic {
+        height: 3.52rem;
+
+        img {
+            width: 100%;
+        }
+    }
+
+    .banner-txt {
+        position: absolute;
+        left: 0.2rem;
+        bottom: 0.2rem;
+
+        .bt-picnum {
+            background-color: rgba(0, 0, 0, 0.6);
+            line-height: 0.4rem;
+            text-align: center;
+            font-size: 0.24rem;
+            border-radius: 0.2rem;
+
+            .iconfont {
+                font-size: 0.24rem;
+            }
+        }
+
+        .bt-tit {
+            font-size: 0.28rem;
+            margin-top: 0.2rem;
+        }
+    }
+}
+</style>
+```
+
+
+### 二、公用图片画廊组件拆分
+
+这一章来创建一个公用图片画廊的组件，点击 banner 图，会打开一个图片画廊，图片有轮播滚动的效果，并且在底部会显示一共有几张图，当前是第几张图的效果。
+
+以为在其他地方可能也会用到这个组件，所以我们把他作为一个公共组件来开发，首先创建这个公共组件，在 src 目录下创建 common 目录，然后在里面创建 gallary 目录，并在里面创建 Gallary.vue 文件，将画廊的代码编写到这个组件中。
+
+这个时候我们要去 banner 中引入并使用这个组件，这里我们可以配置一下路径，回忆一下 /api 路径 是怎么配置指向为 /static/mock 路径的。打开 build 目录下的 webpack.base.conf.js，在 alias 中，我们添加一条配置信息，'common': resolve('src/common')，也就是让 common 指向 src 下的 common 目录。
+
+刚才修改了配置信息，所以要重启一下项目服务才能生效。回到 banner.vue 中，可以直接 import CommonGallary from "common/gallary/Gallary" 来引入公共画廊组件，这样就不用再向上一层目录去寻找文件了。然后在组件对象中添加 CommonGallary 这个组件，并在模板中使这个组件。
+
+在 banner.vue 中完成组件的引入与使用后，我们来编写一下 Gallary.vue 这个组件的布局与样式。
+
+Gallary.vue
+```
+<template>
+<div class="gallery-con">
+    <div class="gc-wrapper">
+        <swiper :options="swiperOptions" class="swiper">
+            <swiper-slide class="slide">
+                <img
+            class="slide-img"
+            src="http://img1.qunarzz.com/sight/p0/1902/84/84696f368bbec10da3.img.jpg_350x240_3a0fefe8.jpg"
+            alt
+          >
+        </swiper-slide>
+                <swiper-slide>
+                    <img
+            class="slide-img"
+            src="http://img1.qunarzz.com/sight/p0/1902/f3/f351c5dd27344a30a3.img.jpg_350x240_1136e527.jpg"
+            alt
+          >
+        </swiper-slide>
+            <div class="swiper-pagination" slot="pagination"></div>
+        </swiper>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "CommonGallary",
+    data() {
+        return {
+            // swiperOptions: {
+            //     loop: false,
+            //     pagination: '.swiper-pagination',
+            //     paginationType : 'bullets',
+            // }
+            swiperOptions: {
+                loop: true,
+                pagination: {
+                    el: ".swiper-pagination",
+                    type: "fraction"
+                }
+            }
+        };
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+.gallery-con {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 9;
+    background-color: #000;
+
+    .gc-wrapper {
+        .slide-img {
+            width: 100%;
+        }
+
+        .swiper-pagination {
+            color: #fff;
+        }
+    }
+}
+</style>
+```
+
+**补充数组分野不生效问题**
+
+以上就完成了画廊组件基本的样式布局，但是现在轮播图片是写死的，接下来我们通过获取数据动态的将轮播图片渲染出来，在 props 中定义一组默认数据，模拟通过 props 接收外部传来的数据。
+
+Gallary.vue
+```
+<template>
+<div class="gallery-con">
+    <div class="gc-wrapper">
+        <swiper :options="swiperOptions" class="swiper">
+            <swiper-slide class="slide" v-for="(item,index) of imgs" :key="index">
+                <img
+            class="slide-img"
+            :src="item"
+            alt
+          >
+            </swiper-slide>
+            <div class="swiper-pagination" slot="pagination"></div>
+        </swiper>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "CommonGallary",
+    props:{
+        imgs:{
+            type : Array,
+            default(){
+                return ["http://img1.qunarzz.com/sight/p0/1902/84/84696f368bbec10da3.img.jpg_350x240_3a0fefe8.jpg","http://img1.qunarzz.com/sight/p0/1902/f3/f351c5dd27344a30a3.img.jpg_350x240_1136e527.jpg"]
+            }
+        }
+    },
+    data() {
+        return {
+            swiperOptions: {
+                loop: true,
+                pagination: {
+                    el: ".swiper-pagination",
+                    type: "fraction"
+                }
+            }
+        };
+    }
+};
+</script>
+```
+
+但是，公用的组件其实不应该有默认值，将 default 中 return 改为一个空数组，然后打开 banner.vue 组件，我让这个组件给 Gallary.vue 组件传一组数据，将刚才那组图片数据放到 banner.vue 中的 data 中并返回。然后通过属性的形式将 imgs 传给 common-gallary 组件，Gallary.vue 再通过 props 接收这个 imgs 就可以了。
+
+banner.vue
+```
+data(){
+    return {
+        imgs : ["http://img1.qunarzz.com/sight/p0/1902/84/84696f368bbec10da3.img.jpg_350x240_3a0fefe8.jpg","http://img1.qunarzz.com/sight/p0/1902/f3/f351c5dd27344a30a3.img.jpg_350x240_1136e527.jpg"]
+    }
+}
+```
+
+Gallary.vue
+```
+props:{
+    imgs:{
+        type : Array,
+        default(){
+            return imgs
+        }
+    }
+},
+```
+
+此时打开页面，轮播依然可以正常渲染出来，没有问题。接着我们做一些逻辑上的控制，在 banner.vue 中让 common-gallary 默认是隐藏的，使用 v-show 中传一个 showGallary 变量，默认为 false，用这个变量来控制画廊的显示与隐藏。这个时候打开页面，可以看到画廊是不显示的。接下来我们要做一件事情，就是点击 banner 区域显示画廊。
+
+打开 banner.vue，给 banner 外层区域绑定一个点击事件，并在 methods 中写这个方法：
+
+banner.vue
+```
+<div class="banner-con" @click="hanleBannerClick"></div>
+
+methods:{
+    hanleBannerClick(){
+        this.showGallary = true
+    }
+}
+```
+
+但是这个时候打开页面，会看到轮播出现了问题，因为开始 swiper 是隐藏状态，再次打开后，swiper 计算就会有问题，所以这里需要给 swiper 添加两个参数 observeParents（当Swiper的父元素变化时，Swiper更新）和 observer（当改变swiper的样式（例如隐藏/显示）或者修改swiper的子元素时，自动初始化swipe）,
+
+Gallery.vue
+```
+swiperOptions: {
+    loop: true,
+    pagination: {
+        el: ".swiper-pagination",
+        type: "fraction"
+    },
+    observeParents : true,
+    observer : true
+}
+```
+
+这个时候就没有任何问题了。接下来再实现一个功能，就是点击画廊，可以将他关闭。首先在 Gallary.vue 中给画廊组件绑定一个点击事件 handleGalleryClick，然后在 methods 中通过 emit 向外触发一个 close 事件，然后去 banner.vue 中绑定这个 close 事件，添加一个事件方法例如 GalleryClose，然后在 methods 中编写 GalleryClose 方法，让 showGallary 这个变量变为 flase，这样就实现了点击画廊，画廊关闭的效果。附上 Gallary.vue 和 banner.vue 的代码：
+
+Gallary.vue
+```
+<template>
+<div class="gallery-con" @click="handleGalleryClick">
+    <div class="gc-wrapper">
+        <swiper :options="swiperOptions" class="swiper">
+            <swiper-slide class="slide" v-for="(item,index) of imgs" :key="index">
+                <img
+            class="slide-img"
+            :src="item"
+            alt
+          >
+            </swiper-slide>
+            <div class="swiper-pagination" slot="pagination"></div>
+        </swiper>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "CommonGallary",
+    props:{
+        imgs:{
+            type : Array,
+            default(){
+                return imgs
+            }
+        }
+    },
+    data() {
+        return {
+            swiperOptions: {
+                loop: true,
+                pagination: {
+                    el: ".swiper-pagination",
+                    type: "fraction"
+                },
+                observeParents : true,
+                observer : true
+            }
+        }
+    },
+    methods:{
+        handleGalleryClick(){
+            this.$emit("close");
+        }
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+.gallery-con {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 9;
+    background-color: #000;
+
+    .gc-wrapper {
+        .slide-img {
+            width: 100%;
+        }
+
+        .swiper-pagination {
+            color: #fff;
+        }
+    }
+}
+</style>
+```
+
+banner.vue
+```
+<template>
+<div>
+    <div class="banner-con" @click="hanleBannerClick">
+    <div class="banner-return">
+        <span class="iconfont">&#xe624;</span>
+    </div>
+    <div class="banner-pic">
+        <img
+        src="//img1.qunarzz.com/sight/p0/1707/e1/e13a1e819bc59b79a3.img.jpg_600x330_29b1824b.jpg"
+        alt
+      >
+    </div>
+        <div class="banner-txt">
+            <div class="bt-picnum">
+                <span class="iconfont">&#xe624;</span>3
+            </div>
+            <div class="bt-tit">涠洲岛船票</div>
+        </div>
+    </div>
+    <common-gallary :imgs="imgs" v-show="showGallary" @close="GalleryClose"></common-gallary>
+</div>
+
+</template>
+
+<script>
+import CommonGallary from "common/gallary/Gallary"
+export default {
+    name: "DetailBanner",
+    components : {
+        CommonGallary
+    },
+    data(){
+        return {
+            showGallary : false,
+            imgs : ["http://img1.qunarzz.com/sight/p0/1902/84/84696f368bbec10da3.img.jpg_350x240_3a0fefe8.jpg","http://img1.qunarzz.com/sight/p0/1902/f3/f351c5dd27344a30a3.img.jpg_350x240_1136e527.jpg"]
+        }
+    },
+    methods:{
+        hanleBannerClick(){
+            this.showGallary = true
+        },
+        GalleryClose(){
+            this.showGallary = false
+        }
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+.banner-con {
+    position: relative;
+    color: #fff;
+
+    .banner-return {
+        position: absolute;
+        top: 0.2rem;
+        left: 0.2rem;
+        width: 0.72rem;
+        height: 0.72rem;
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 50%;
+        text-align: center;
+        line-height: 0.72rem;
+    }
+
+    .banner-pic {
+        height: 3.52rem;
+
+        img {
+            width: 100%;
+        }
+    }
+
+    .banner-txt {
+        position: absolute;
+        left: 0.2rem;
+        bottom: 0.2rem;
+
+        .bt-picnum {
+            background-color: rgba(0, 0, 0, 0.6);
+            line-height: 0.4rem;
+            text-align: center;
+            font-size: 0.24rem;
+            border-radius: 0.2rem;
+
+            .iconfont {
+                font-size: 0.24rem;
+            }
+        }
+
+        .bt-tit {
+            font-size: 0.28rem;
+            margin-top: 0.2rem;
+        }
+    }
+}
+</style>
+```
+
+以上我们就完成了公用图片画廊组件拆分与功能的实现，最后记得提交代码并合并分支。
