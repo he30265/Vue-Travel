@@ -61,12 +61,16 @@ export default {
     background-color: #000;
 
     .gc-wrapper {
+        .swiper-container{
+            overflow: inherit;
+        }
         .slide-img {
             width: 100%;
         }
 
         .swiper-pagination {
             color: #fff;
+            bottom -.6rem;
         }
     }
 }
