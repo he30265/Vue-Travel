@@ -15,28 +15,35 @@
 <script>
 export default {
     name: "DetailHeader",
-    data(){
+    data() {
         return {
             showAbs: true,
-            opacityStyle:{
-                opacity : 0
+            opacityStyle: {
+                opacity: 0
             }
-        }
+        };
     },
-    methods:{
-        handleScroll(){
+    methods: {
+        handleScroll() {
+            // console.log("scroll");
             const top = document.documentElement.scrollTop;
-            if(top > 50){
-                let opacity = top /120;
-                opacity = opacity > 1 ? 1 : opacity;       this.opacityStyle = {opacity};
+            if (top > 50) {
+                let opacity = top / 120;
+                opacity = opacity > 1 ? 1 : opacity;
+                this.opacityStyle = {
+                    opacity
+                };
                 this.showAbs = false;
-            }else{
+            } else {
                 this.showAbs = true;
             }
         }
     },
-    activated(){
-        window.addEventListener("scroll",this.handleScroll);
+    activated() {
+        window.addEventListener("scroll", this.handleScroll);
+    },
+    deactivated() {
+        window.removeEventListener("scroll", this.handleScroll);
     }
 };
 </script>
@@ -47,15 +54,15 @@ export default {
 .detail-header {
     .header-abs {
         position: absolute;
-        top: .2rem;
-        left: .2rem;
+        top: 0.2rem;
+        left: 0.2rem;
         width: 0.68rem;
         height: 0.68rem;
         background-color: rgba(0, 0, 0, 0.6);
         border-radius: 50%;
         text-align: center;
         line-height: 0.68rem;
-        color #fff
+        color: #fff;
     }
 
     .header-fix {

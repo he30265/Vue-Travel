@@ -1014,5 +1014,46 @@ export default {
 
 接下来就该实现渐隐渐显的动画效果了，在 if 判断中定义一个 opacity 变量，他等于 top/120，因为 top 值在页面滚动的时候是变化的，所以 opacity 也就是变化的了，然后做一个三元运算，当这个 opacity 大于 1 的时候，我就让他一直等于 1，也就是让他一直显示，否则的话，还是让他等于这个 opacity 变量，然后给 data 中的 opacityStyle 设置值，让他里边的 opacity 等于 opacity。回到页面，向下滚动，可以看到导航出现了一个渐隐渐显的效果。最后记得给导航中的返回按钮也添加一个返回首页的路由。
 
+以上就实现了 Header 渐隐渐显效果。
 
-以上就实现了 Header 渐隐渐显效果，最后记得提交代码并合并分支。
+
+
+
+### 对全局事件的解绑
+
+先来回顾上一章，给 window 对象添加滚动监听事件这部分，我们在 handleScroll 中打印一些内容，例：
+
+detail/header.vue
+```
+methods:{
+    handleScroll(){
+        console.log("scroll");
+        // ...
+    }
+},
+activated(){
+    window.addEventListener("scroll",this.handleScroll);
+}
+```
+
+启动项目服务，打开页面，在详情页滚动页面的时候，可以看到控制台输出了 “scroll” 内容，这没有问题，但是，回到首页，在滚动页面的时候，控制台中也打印出了 “scroll” 内容，也就是说首页也执行了 handleScroll 这个方法，但是这个方法我们是写在 header.vue 中的，为什么首页也会有呢？
+
+因为之前我们都是用 @ 给元素绑定事件，而且是给当前组件中的元素绑定，他只作用于组件的内部，不会影响外部的组件，但是这里我们是给全局的 window 对象绑定的，所以会造成这种问题，这个滚动事件不仅对这个组件有效果，对其他的组件也产生了影响，那如何去处理这个问题呢？
+
+当我们对这个组件用了 keep-alive 的时候，这个组件会多出一个 activted 生命是周期函数，这一块内容可以回顾一下 [“Vue.js第7课-项目实战-城市列表开发（part04）”]() 中的第十一章，activted 在每次页面展示的时候会执行，与之对应，他还提供给我们一个新的生命周期函数，叫做 deactivted，他是页面即将被隐藏，或者说页面即将被替换成新的页面的时候，这个组件的 deactivted 这个生命周期函数会被执行，我们在这个函数中将给 window 对象添加的滚动事件给移除掉。
+
+detail/header.vue
+```
+// ...
+activated(){
+    window.addEventListener("scroll",this.handleScroll);
+},
+deactivated(){
+    window.removeEventListener("scroll",this.handleScroll);
+}
+// ...
+```
+
+也就你页面展示的时候绑定 scroll 事件，页面隐藏的时候再去对这个 scroll 事件进行解绑。这个时候，回到页面，在详情页滚动的时候，可以看到打印出了 “scroll”，回到首页，滚动页面的时候，并没有打印出 “scroll”，说明并没有执行滚动时间，这样就解决了上一章中留下的 BUG。
+
+最后记得提交代码并合并分支。
