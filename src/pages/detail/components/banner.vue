@@ -1,12 +1,9 @@
 <template>
 <div>
     <div class="banner-con" @click="hanleBannerClick">
-    <div class="banner-return">
-        <span class="iconfont">&#xe624;</span>
-    </div>
     <div class="banner-pic">
         <img
-        src="//img1.qunarzz.com/sight/p0/1707/e1/e13a1e819bc59b79a3.img.jpg_600x330_29b1824b.jpg"
+        src="http://img1.qunarzz.com/sight/p0/1707/e1/e13a1e819bc59b79a3.img.jpg_600x330_29b1824b.jpg"
         alt
       >
     </div>
@@ -50,18 +47,6 @@ export default {
 .banner-con {
     position: relative;
     color: #fff;
-
-    .banner-return {
-        position: absolute;
-        top: 0.2rem;
-        left: 0.2rem;
-        width: 0.72rem;
-        height: 0.72rem;
-        background-color: rgba(0, 0, 0, 0.6);
-        border-radius: 50%;
-        text-align: center;
-        line-height: 0.72rem;
-    }
 
     .banner-pic {
         height: 3.52rem;
