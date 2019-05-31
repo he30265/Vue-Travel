@@ -12,7 +12,7 @@
     </div>
         <div class="banner-txt">
             <div class="bt-picnum">
-                <span class="iconfont">&#xe624;</span>3
+                <span class="iconfont">&#xe685;</span>3
             </div>
             <div class="bt-tit">涠洲岛船票</div>
         </div>
@@ -85,6 +85,7 @@ export default {
 
             .iconfont {
                 font-size: 0.24rem;
+                margin-right: 0.1rem;
             }
         }
 

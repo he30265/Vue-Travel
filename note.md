@@ -1484,7 +1484,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-    
+
 </style>
 ```
 
@@ -1523,7 +1523,7 @@ export default new Router({
 这个时候，打开页面，点击城市，url 后面就会跟一个该城市对应的 id。下面我们先来完成详情页面的布局与样式。
 
 先来完成一下 banner 部分，在 detail 目录下新建一个 components 目录，然后在 components 目录中新建一个 banner.vue 组件。
-**改图标**
+
 detail/banner.vue
 ```
 <template>
@@ -1539,7 +1539,7 @@ detail/banner.vue
     </div>
         <div class="banner-txt">
             <div class="bt-picnum">
-                <span class="iconfont">&#xe624;</span>3
+                <span class="iconfont">&#xe685;</span>3
             </div>
             <div class="bt-tit">涠洲岛船票</div>
         </div>
@@ -1591,6 +1591,7 @@ export default {
 
             .iconfont {
                 font-size: 0.24rem;
+                margin-right: 0.1rem;
             }
         }
 
@@ -1690,7 +1691,7 @@ export default {
 </style>
 ```
 
-**补充数组分野不生效问题**
+**补充数字分页不生效问题**
 
 以上就完成了画廊组件基本的样式布局，但是现在轮播图片是写死的，接下来我们通过获取数据动态的将轮播图片渲染出来，在 props 中定义一组默认数据，模拟通过 props 接收外部传来的数据。
 
