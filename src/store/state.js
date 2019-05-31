@@ -7,5 +7,6 @@ try {
 
 }
 export default {
-    city: defaultCity
+    city: defaultCity,
+    city2 : "test"
 }

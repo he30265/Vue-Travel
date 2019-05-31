@@ -11,7 +11,8 @@
 </template>
 
 <script>
-import BScroll from "better-scroll"
+import {mapMutations} from "vuex";
+import BScroll from "better-scroll";
 export default {
     name: "CitySearch",
     props: {
@@ -26,8 +27,10 @@ export default {
     },
     methods:{
         handleCityClick(city){
-            this.$store.commit("changeCity",city);
-        }
+            // this.$store.commit("changeCity",city);
+            this.changeCity(city)
+        },
+        ...mapMutations(['changeCity'])
     },
     computed:{
         noKeyword(){

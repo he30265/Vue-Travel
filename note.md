@@ -1238,11 +1238,13 @@ city/list.vue
 
 ### 十、Vuex 的高级使用及 localStorage
 
+#### 1、localStorage
+
 这一章讲解一些稍微高级的 Vuex 的 api 的使用，同时讲解一下 localStorage 这个本地存储的内容。
 
-上一章，我们在 src 目录下新建了一个 store 目录，这里存储了 Vuex 中的默认数据，city 设置成了北京，其实这样去写，是有问题的，点击城市，会改变这个 city，但是当页面刷新了，就又变回了北京。在真实的项目中，如果你这次选中了一个城市，下次再打开这个网页的时候，上次选的城市还应该在的，怎么解决这个问题呢？我们需要引入一个新的概念，叫做 localStorage，HTML5 中提供了一个新的 api，叫做 localStorage，它可以帮助我们实现类似与 cookie 的功能，做到本地存储，他的 api 要比 cookie 更加的简单，所以这里我们使用 localStorage 实现保存城市的功能。
+上一章，我们在 src 目录下新建了一个 store 目录，这里存储了 Vuex 中的默认数据，city 设置成了“北京”，其实这样去写，是有问题的，点击城市，会改变这个 city，但是当页面刷新了，就又变回了北京。在真实的项目中，如果你这次选中了一个城市，下次再打开这个网页的时候，上次选的城市还应该在的，怎么解决这个问题呢？我们需要引入一个新的概念，叫做 localStorage，HTML5 中提供了一个新的 api，叫做 localStorage，它可以帮助我们实现类似与 cookie 的功能，做到本地存储，他的 api 要比 cookie 更加的简单，所以这里我们使用 localStorage 实现保存城市的功能。
 
-打开 store/index.js，我们这样去写，当用户尝试去改变城市的时候，我不但把 state 中的 city 该了，同时还去存一个 localStorage，直接写 localStorage.city = city 就可以了。然后让 stare 中 city 的默认值是 localStorage.city || "北京"，就可以了。也就是 city 的值我默认先去 localStorage 中取，如果取不到，才用默认的 “北京”。
+打开 store/index.js，我们这样去写，当用户尝试去改变城市的时候，我不但把 state 中的 city 改了，同时还去存一个 localStorage，直接写 localStorage.city = city 就可以了。然后让 stare 中 city 的默认值是 localStorage.city || "北京"，就可以了。也就是 city 的值我默认先去 localStorage 中取，如果取不到，才用默认的 “北京”。
 
 store/index.js
 ```
@@ -1294,7 +1296,7 @@ export default new Vuex.Store({
 })
 ```
 
-现在我们看到 store/index.js 这个文件慢慢的变得复杂起来了，实际上，在真正的项目开发和之中，会做进一步的拆分，也就是把这个文件拆分为 State、Actions、Mutations，在 store 中创建一个文件叫 state.js（只存储公用数据），然后把设置数据这块代码放进去，并通过 export 导出的内容就是在 index.js 中定义的 state 对象里的内容：
+现在我们看到 store/index.js 这个文件慢慢的变得复杂起来了，实际上，在真正的项目开发和之中，会做进一步的拆分，也就是把这个文件拆分为 State、Actions、Mutations，在 store 中创建一个文件叫 state.js（只存储公用数据），然后把设置默认数据的这块代码放进去，并通过 export 导出，内容就是在 index.js 中定义的 state 对象里的内容：
 ```
 let defaultCity = "北京"
 try {
@@ -1353,13 +1355,19 @@ export default new Vuex.Store({
 })
 ```
 
-这样，我们就将 vuex 的代码拆分成了 State、Actions、Mutations 这几个部分，未来他的维护性也会得到比较大的提高。
-**there 作图**
+这样，我们就将 vuex 的代码拆分成了 State、Actions、Mutations 这几个部分，他们也就分别对应着 state.js、index.js、mutations.js，未来他的维护性也会得到比较大的提高。
 
-最后我们对 vuex 的使用做一个优化，对 pages/home/header.vue 进行一个优化，可以看到之前使用公用数据的时候，需要写 {{this.$store.state.city}} 一长串内容，vuex 给我们一个比较高级的 api，我们可以这样去写代码：
+![](https://upload-images.jianshu.io/upload_images/9373308-e028f3dc4a9aa5d5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+
+
+#### 2、Vuex 中高级 api 的使用
+
+最后我们对 vuex 的使用做一个优化，先对 pages/home/header.vue 进行一个优化，可以看到之前使用公用数据的时候，需要写：
 ```
-import {mapState} from "vuex";
+{{this.$store.state.city}}
 ```
+ 一长串内容，vuex 给我们一个比较高级的 api，先通过 import 引入 import {mapState} from "vuex";
 
 之后来一个计算属性，在计算属性中用一个展开运算符：
 ```
@@ -1371,13 +1379,12 @@ export default {
   }
 };
 ```
-里面可以写一个数组，mapState 是指，我把 vuex 里面的数据映射到我这个组件的 computed 中，我把 city 这个公用数据映射到我的一个名字叫做 city 的计算属性之中，做好这个映射之后，上面就不用写这么麻烦了，把 {{this.$store.state.city}} 改为 this.city 就可以了。
-
-下面我们再去城市选择页做一个修改，
-
+里面可以写一个数组，mapState 是指，我把 vuex 中 state 里的数据映射到我这个组件的 computed 中，把 city 这个公用数据映射到我的一个名字叫做 city 的计算属性之中，做好这个映射之后，上面就不用写这么麻烦了：
 ```
-import {mapState} from 'vuex';
+把 {{this.$store.state.city}} 改为 {{this.city}} 就可以了。
 ```
+
+下面我们再去城市选择页给“当前城市”做一个修改，还是先 import {mapState} from 'vuex';
 
 然后再写一个计算属性，刚才我们在展开运算符中传入的是一个数组，这回我们传一个对象：
 ```
@@ -1390,13 +1397,14 @@ computed:{
 // ...
 ```
 
-他的意思就是，我想把 vuex 里的 city 这个公用的数据映射到我这个组件的计算属性里，映射过来的名字叫做 currentCity，如果这么写的话，上面的当前城市就可以改为 {this.currentCity}。
+他的意思就是，我想把 vuex 里的 city 这个公用的数据映射到我这个组件的计算属性里，映射过来的名字叫做 currentCity，如果这么写的话，上面的当前城市就可以改为 {{this.currentCity}}。
 
 再改一下下面的城市列表，在 methods 中，当我点击城市按钮的时候，会派发一个 Mutations，vuex 同样给我们提供了一个简便的方法，叫做 mapMutations，所以我们可以这样改一下 import：
 ```
 import {mapState,mapMutations} from 'vuex';
 ```
-然后在 methods 中应用 mapMutations，这里一样可以传一个数组，传一个 changeCity：
+
+然后在 methods 中使用 mapMutations，这里一样可以传一个数组，传一个 changeCity：
 ```
 methods:{
     handleCityClick(city){
@@ -1411,13 +1419,20 @@ methods:{
 ```
 this.$store.commit("changeCity",city);
 ```
-这么麻烦的写了，可以直接改为 this.changeCity(city); 就行了。我们把这块 methods 中的方法复制一下，放到 search.vue 里面，记得在上面引入 mapMutations：import {mapMutations} from 'vuex'。
+这么麻烦的写了，可以直接改为 this.changeCity(city); 就行了。
+
+search.vue 组件也修改一下，我们把这块 methods 中的方法复制一下，放到 search.vue 里面，记得在上面引入 mapMutations：import {mapMutations} from 'vuex'。
+
+**小结一下，首先是 mapState 这个东西，State 我们知道，里面存放的是公用数据，加上 map 它就是一个方法，这个方法能够映射 State 中的公用数据，通过 ES6 中的展开运算符来映射，例如 ...mapState(['city']) 就映射到了 State 中的 city 数据，然后放到组件的计算属性 computed 中，这样就可以直接通过 this.city 来获取 city 的值了，就不需要先去 Store，然后再去 state 里找 city 了。...mapState(）里边也可以是一个对象，如果是对象，需要有键和值。**
+
+**然后是 mapMutations 这个东西，Mutations 是来改变 State（公用的数据）的，加上 map 也就是一个方法，之前在点击事件中，我们是通过 commit 将事件及数据提交给 Mutations 的，然后 Mutations 再去改变 State 中的公用数据，现在我们不用这样做了，vuex 同样给我们提供了一个简便的方法，叫做 mapMutations，还是通过展开运算符，例如 ...mapMutations(['changeCity']) 它的意思就是我通过 mapMutations 映射到了 Mutations 中的 changeCity 这个方法，就不需要 Commit 来连接了，所以直接在组件中使用 changeCity 方法就可以了。**
+
 
 到这里，Vue 的一些高级写法也带大家接触了。接下来，打开 Vue 的官网，打开 Vuex，可以看到他有几个核心的概念：
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-e7cef2ec3eaea316.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-State 我们几经熟悉了，存放的是公用的文件，Action 我们也用过，一些一步的方法我们可以写在 Action 中，Mutation 里放的是同步的大的对数九的一些改变，接下来看一下 Getter 的作用。
+State 我们已经熟悉了，存放的是公用的文件，Action 我们也用过，一些异步的方法我们可以写在 Action 中，Mutation 是对数据所以写改变，接下来看一下 Getter 的作用。
 
 回到 store/index.js 中，写一个 getters，它对应的是一个对象，我们可以写一个方法，叫做 doubleCity，他会接收一个参数叫做 state，可以这样写：
 ```
@@ -1440,13 +1455,39 @@ export default {
 };
 ```
 
-他的意思就是我们把 Vuex 里的 getters 映射到我这个组件里的一个 computed 的计算属性里，这样就可以在右上角城市位置直接使用 {{this.doubleCity}} 了，打开页面，就可以看到右上角出现了两遍的城市名。
+他的意思就是我们把 Vuex 里的 Getters 映射到我这个组件里的一个 computed 的计算属性里，这样就可以在右上角城市位置直接使用 {{this.doubleCity}} 了，打开页面，就可以看到右上角出现了两遍的城市名。
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-b03e9182b61c4fd3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 那这有什么用呢？实际上，在 Vuex 中 getters 的作用有点类似于组件中的 computed 计算属性的作用，当我们需要根据 state 里面的数据算出一些新的数据的时候，我们就可以借助 getters 这样一个工具来提供新的数据，这样的话，我们可以避免数据的冗余。
 
 最后，再来看一下 Vuex 中的最后一个核心概念，叫做 Module，什么时候用到 Module 呢？当我们遇到一个非常复杂的业务场景，比如在管理后台系统的时候，经常会有很多共用的数据，在 Vuex 中进行存储，如果我们把所有的 Mutations 都放到 mutations.js 文件中，这个文件慢慢的会变得非常庞大，难以维护，这个时候，我们可以借助 Module 对一个复杂的 Mutations、State 包括 Actions 进行一个拆分，可以看一下官网的例子，他定义了几个模块，moduleA、moduleB，创建 store 的时候，可以通过模块来做 store 的创建，这样有一个好处，就是，A 模块存储和 A 模块相关的数据，以及操作就可以了，B 模块存储 B 模块对应的数据及对数据的操做，然后在创建 store 的时候，我对各个模块进行整合，通过 Modul 写我们的代码，可以是代码具有更好的可维护性。当然，目前我们的项目中只有一个 city 这样的一个共有数据，所以没有必要去使用 Module 把我们的代码进行拆分。
+
+来自官网：
+```
+const moduleA = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... }
+}
+
+const moduleB = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... }
+}
+
+const store = new Vuex.Store({
+  modules: {
+    a: moduleA,
+    b: moduleB
+  }
+})
+
+store.state.a // -> moduleA 的状态
+store.state.b // -> moduleB 的状态
+```
 
 以上就讲解了 Vuex 的高级使用及 localStorage，记得提交代码到远程仓库。
 
@@ -1456,7 +1497,7 @@ export default {
 
 这一章我们学习使用 keep-alive 这个 Vue 内置的 Vue 标签来对我们已经写好的两个页面进行性能的优化，首先还是先建一个分支 city-keepalive 并切换，在这个分支上进行开发。
 
-启动项目服务，打开页面，这样看不存在什么问题，基本的一些业务逻辑都已经实现了，但是在控制台中打开 Network 网络这个选项，选择 XHR，当初次进入首页的时候，请求了一个 index.json 的文件，然后切换到列表页，又请求了一个 city.json，然后再回到首页，index.json 又请求了一次，再次去列表页，city.json 又请求了一次，也就是，没一次路由发生变化的时候，Ajax 都会重新的被发送。
+启动项目服务，打开页面，这样看不存在什么问题，基本的一些业务逻辑都已经实现了，但是在控制台中打开 Network 网络这个选项，选择 XHR，当初次进入首页的时候，请求了一个 index.json 的文件，然后切换到列表页，又请求了一个 city.json，然后再回到首页，index.json 又请求了一次，再次去列表页，city.json 又请求了一次，也就是，每一次路由发生变化的时候，Ajax 都会重新的被发送。
 
 ![](https://upload-images.jianshu.io/upload_images/9373308-f536d48e2960f553.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -1464,7 +1505,7 @@ export default {
 
 打开 main.js，可以看到入口组件是 App 这个组件，再打开 App.vue，router-view 显示的是当前地址所对应的内容，我们可以在外层包裹一个 keep-alive 的一个标签，他是 Vue 自带的一个标签，他的意思就是我的路由的内容被加载一次后，我就把路由中的内容放到内存之中，下一次再进入这个路由的时候，不需要重新渲染这个组件，去重新执行钩子函数，只要去内存里把以前的内容拿出来就可以，这个时候，回到页面上，再打开 Network，进入到列表页，选择城市再返回首页，就不会再去加载 index.json 了，同样再进入列表页，也不会再去加载 city.json 了，他直接会从内存中调数据，而不会重新去法 Ajax 请求了。
 
-这样还是存在逻辑上的问题的，当我在“北京”的时候，首页显示的是“北京”的内容，当切换为“上海”时，树叶就应该显示“上海”的内容，所以城市发生改变的时候，首页还需要重新发一次 Ajax 请求，我们对这一块做一个调整。
+这样还是存在逻辑上的问题的，当我在“北京”的时候，首页显示的是“北京”的内容，当切换为“上海”时，首页就应该显示“上海”的内容，所以城市发生改变的时候，首页还需要重新发一次 Ajax 请求，来获取不同城市的数据信息，我们对这一块做一个调整。
 
 打开 Home.vue 组件，改一下 axios 请求地址这里，在他的后面带一个参数，让他等于 Vuex 中存的当前的城市，所以还需要在 Home.vue 组件中引用 Vuex，import { mapState } from "vuex"，然后再加一个计算属性：
 ```
@@ -1498,13 +1539,22 @@ activated(){
 
 首先在页面被挂载的时候，也就是 mounted 中一定会去发一个 Ajax 请求，当页面重新被显示的时候，activated 一定会被重新的执行，那么我们就可以在页面每次重新显示的时候，可以判断当前页面上的城市和上次页面上显示的城市是否是相同的，如果不相同的，就再发一次 Ajax 请求。
 
-先在 data 中设置一个数据 lastCity，默认值是空，接着当页面被挂载的时候，让他等于 this.city，对上一次的城市做一个保存，当页面被重新激活的时候，我们在 activted 中这样写：
+先在 data 中设置一个数据 lastCity，默认值是空，接着当页面被挂载的时候，让他等于 this.city，对上一次的城市做一个保存：
 ```
-activated(){
-    if(this.lastCity !== this.city){
+mounted() {
+    this.lastCity = this.city
+    this.getHomeInfo();
+},
+```
+
+当页面被重新激活的时候，我们在 activted 中这样写：
+```
+activated() {
+    if(this.lastCity != this.city){
+        this.lastCity = this.city
         this.getHomeInfo();
     }
-}
+},
 ```
 
 如果上一次的城市 lastCity 不等于当前城市的时候，就重新发一个 Ajax 请求，直接调用上面 getHomeInfo 方法就可以了。当上次的 city 和这次的 city 不一样时，还需要让他等于这次的 city。回到页面上，可以看到当切换的城市和上次的城市一样时，Ajax 就不会请求 city.json 了，当不一样时，才会去请求 city.json。

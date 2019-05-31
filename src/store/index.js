@@ -13,5 +13,10 @@ export default new Vuex.Store({
     //         ctx.commit("changeCity",city);
     //     }
     // },
-    mutations:mutations
+    mutations:mutations,
+    getters:{
+        doubleCity(){
+            return state.city + " " + state.city
+        }
+    }
 })
