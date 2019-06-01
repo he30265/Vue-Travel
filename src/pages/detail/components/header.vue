@@ -67,6 +67,7 @@ export default {
 
     .header-fix {
         position: fixed;
+        z-index: 9;
         top: 0;
         left: 0;
         right: 0;

@@ -1057,3 +1057,199 @@ deactivated(){
 也就你页面展示的时候绑定 scroll 事件，页面隐藏的时候再去对这个 scroll 事件进行解绑。这个时候，回到页面，在详情页滚动的时候，可以看到打印出了 “scroll”，回到首页，滚动页面的时候，并没有打印出 “scroll”，说明并没有执行滚动时间，这样就解决了上一章中留下的 BUG。
 
 最后记得提交代码并合并分支。
+
+
+
+### 五、使用递归组件实现详情页列表
+
+这一章我们来实现详情页的列表部分，可以看一下 [去哪网](http://touch.piao.qunar.com/touch/detail.htm?id=38170&from=as_recommend_sight) 的详情页列表部分，因为内容比较多，所以我们先简单的实现一部分列表内容，来看一下递归组件如何使用。
+
+首先还是新建一个 detail-list 分支并切换，在这个分支上进行代码的开发。然后新建 list.vue，编写组件的基本结构，然后到 Detail.vue 中引入并使用这个模板。这次我们先不编写模板的样式，先来看一下对数据的处理，在 Detail.vue 中添加一组数据，例：
+
+Detail.vue
+```
+data() {
+    return {
+        list: [{
+                title: "故宫预售老人票",
+                children: [{
+                        title: "故宫+珍宝馆+钟表馆",
+                        price: 40
+                    },
+                    {
+                        title: "故宫+珍宝馆",
+                        price: 35
+                    }
+                ]
+            },
+            {
+                title: "故宫预售学生票",
+                children: [{
+                        title: "故宫+钟表馆",
+                        price: 40
+                    },
+                    {
+                        title: "故宫",
+                        price: 35
+                    }
+                ]
+            },
+            {
+                title: "大内御讲",
+                children: [{
+                        title: "蓝琪儿格格故宫讲解（不含门票）",
+                        price: 75
+                    },
+                    {
+                        title: "门票+珍宝馆+蓝琪儿格格故宫讲解",
+                        price: 98
+                    }
+                ]
+            }
+        ]
+    };
+}
+```
+
+然后使用属性的方式将 list 传递给子组件 list.vue，list.vue 接收到 list 数据后，我们在模板中将它渲染出来，例：
+
+list.vue
+```
+<template>
+<div>
+    <div class="list-con" v-for="(item,index) of list" :key="index">
+        <div class="list-tit">{{item.title}}</div>
+    </div>
+</div>
+</template>
+```
+
+此时页面是这样的一个效果：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-7396807ba94eeb48.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+之前我们在 list 数据的每一项下还添加了一组子项 children，它里面又包含着几组数据，现在我们将 children 子项页渲染到页面，这个时候就用到递归组件了，递归组件的意思就是在组件自身调用组件自身：
+
+list.vue
+```
+<template>
+<div>
+    <div class="list-con" v-for="(item,index) of list" :key="index">
+        <div class="list-tit">{{item.title}}</div>
+        <div class="list-children">
+            <div v-if="item.children" class="list-children-item">
+                <detail-list :list="item.children"></detail-list>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+```
+
+上面代码中，我们在 list-children 这个元素下，先做了一个判断，当 item.children 下有值的时候，调用一下自身，也就是 detail-list 这个组件，这个组件也是通过属性的形式，传一个 list，因为在 list.vue 中已经通过 props 接收到 list 了，而且外层已经循环过 list 了，现在我们只是要获取 list 下的 children 中的数据了，所以直接让这个 list 属性等于 item.children 就可以了，打开页面，可以看到这样一个效果：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-6ab347e6dda6d0f8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+虽然样式上有问题，但是我们可以在控制台中看到这些数据是存在父子项关系的，说明数据渲染的没有问题，接下来我们对样式做一个调整。
+
+list.vue
+```
+<template>
+<div>
+    <div class="list-con" v-for="(item,index) of list" :key="index">
+        <div class="list-tit border-bottom">
+            <span class="ticket"></span>
+            {{item.title}}
+        </div>
+        <div class="list-children">
+            <div v-if="item.children" class="list-children-item">
+                <detail-list :list="item.children"></detail-list>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "DetailList",
+    props: {
+        list: Array
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+.list-con {
+    .list-tit {
+        position: relative;
+        height: 0.88rem;
+        line-height: 0.88rem;
+        padding: 0 0.2rem 0 0.6rem;
+
+        .ticket {
+            display: inline-block;
+            position: absolute;
+            width: 0.36rem;
+            height: 0.36rem;
+            top: 0.26rem;
+            left: 0.2rem;
+            background: url('//s.qunarzz.com/piao/image/touch/sight/detail.png') 0 -0.45rem no-repeat;
+            background-size: auto;
+            margin-right: 0.1rem;
+            background-size: 0.4rem 3rem;
+        }
+    }
+
+    .list-children {
+        padding: 0 0.2rem;
+
+        .list-children-item {
+            .ticket {
+                background: none;
+            }
+        }
+    }
+}
+</style>
+```
+
+此时打开页面，可以看到页面是这样一个效果的：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-5f2deb6e9f7ee5db.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+如果我们将 data 中 list 例的 children 中再添加一组 children 呢？可以试一下：
+
+Detail.vue
+```
+// ...
+list: [{
+    title: "故宫预售老人票",
+    children: [{
+            title: "故宫+珍宝馆+钟表馆",
+            price: 40,
+            children:[{
+                title:"三级"
+            },{
+                title:"三级"
+            }]
+        },
+        {
+            title: "故宫+珍宝馆",
+            price: 35
+        }
+    ]
+},
+// ...
+```
+
+list.vue 中不需要做任何修改，因为我们在子组件中调用自身的时候，其实就相当于在调用子组件的位置又加了一边 template 中的内容，所以他会找到子数据再循环渲染一次，打开页面可以看一下：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-96ebb9b1d2f3d68f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+没有任何问题，记得将这部分代码提交一下。
+
+
+
+
+
