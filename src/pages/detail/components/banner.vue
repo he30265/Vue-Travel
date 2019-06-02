@@ -3,18 +3,18 @@
     <div class="banner-con" @click="hanleBannerClick">
     <div class="banner-pic">
         <img
-        src="http://img1.qunarzz.com/sight/p0/1707/e1/e13a1e819bc59b79a3.img.jpg_600x330_29b1824b.jpg"
+        :src="bannerImg"
         alt
       >
     </div>
         <div class="banner-txt">
             <div class="bt-picnum">
-                <span class="iconfont">&#xe685;</span>3
+                <span class="iconfont">&#xe685;</span>{{gallaryImgs.length}}
             </div>
-            <div class="bt-tit">涠洲岛船票</div>
+            <div class="bt-tit">{{sightName}}</div>
         </div>
     </div>
-    <common-gallary :imgs="imgs" v-show="showGallary" @close="GalleryClose"></common-gallary>
+    <common-gallary :imgs="gallaryImgs" v-show="showGallary" @close="GalleryClose"></common-gallary>
 </div>
 
 </template>
@@ -26,10 +26,14 @@ export default {
     components : {
         CommonGallary
     },
+    props:{
+        sightName:String,
+        bannerImg :String,
+        gallaryImgs:Array
+    },
     data(){
         return {
             showGallary : false,
-            imgs : ["http://img1.qunarzz.com/sight/p0/1902/84/84696f368bbec10da3.img.jpg_350x240_3a0fefe8.jpg","http://img1.qunarzz.com/sight/p0/1902/f3/f351c5dd27344a30a3.img.jpg_350x240_1136e527.jpg"]
         }
     },
     methods:{
@@ -67,6 +71,8 @@ export default {
             text-align: center;
             font-size: 0.24rem;
             border-radius: 0.2rem;
+            width: max-content;
+            padding: 0 .2rem;
 
             .iconfont {
                 font-size: 0.24rem;

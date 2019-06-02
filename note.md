@@ -1073,36 +1073,30 @@ data() {
         list: [{
                 title: "故宫预售老人票",
                 children: [{
-                        title: "故宫+珍宝馆+钟表馆",
-                        price: 40
+                        title: "故宫+珍宝馆+钟表馆"
                     },
                     {
-                        title: "故宫+珍宝馆",
-                        price: 35
+                        title: "故宫+珍宝馆"
                     }
                 ]
             },
             {
                 title: "故宫预售学生票",
                 children: [{
-                        title: "故宫+钟表馆",
-                        price: 40
+                        title: "故宫+钟表馆"
                     },
                     {
-                        title: "故宫",
-                        price: 35
+                        title: "故宫"
                     }
                 ]
             },
             {
                 title: "大内御讲",
                 children: [{
-                        title: "蓝琪儿格格故宫讲解（不含门票）",
-                        price: 75
+                        title: "蓝琪儿格格故宫讲解（不含门票）"
                     },
                     {
-                        title: "门票+珍宝馆+蓝琪儿格格故宫讲解",
-                        price: 98
+                        title: "门票+珍宝馆+蓝琪儿格格故宫讲解"
                     }
                 ]
             }
@@ -1251,5 +1245,168 @@ list.vue 中不需要做任何修改，因为我们在子组件中调用自身�
 
 
 
+### 六、使用 Ajax 获取动态数据
+
+首先在 static/mock 目录下新建一个 details.json 文件，在里面存放详情页的信息，例如：
+
+details.json
+```
+{
+    "ret": true,
+    "data": {
+        "sightName": "大连圣亚海洋世界(AAAA景区)",
+        "bannerImg": "http://img1.qunarzz.com/sight/p0/201404/23/04b92c99462687fa1ba45c1b5ba4ad77.jpg_600x330_bf9c4904.jpg",
+        "gallaryImgs": ["http://img1.qunarzz.com/sight/p0/201404/23/04b92c99462687fa1ba45c1b5ba4ad77.jpg_800x800_70debc93.jpg", "http://img1.qunarzz.com/sight/p0/1709/76/7691528bc7d7ad3ca3.img.png_800x800_9ef05ee7.png"],
+        "categoryList": [{
+            "title": "成人票",
+            "children": [{
+                "title": "成人三馆联票",
+                "children": [{
+                    "title": "成人三馆联票 - 某一连锁店销售"
+                }]
+            }, {
+                "title": "成人五馆联票"
+            }]
+        }, {
+            "title": "学生票"
+        }, {
+            "title": "儿童票"
+        }, {
+            "title": "特惠票"
+        }]
+    }
+}
+```
+
+然后到 Detail.vue 中通过 axios 获取 detail.json 中的数据，在请求地址这一块需要注意一下，当访问 id 是 001 的景点的时候，需要获取的是 001 这个景点对应的数据，访问 002 获取的就是 002 这个景点对应的数据，所以每一次请求都把这个 id 带给后端，这个 id 是动态路由的一个参数（回忆一下动态路由），如何获得动态路由的参数呢？
+
+首先看一下路由的配置，打开 router 目录下的 index.js，我们给 detail 这个路径后面加了一个 :id，定义了动态路由，会把对应的 id 存在对应的 id 变量里，那么在请求地址这一块就可以这样去写：axios.get("/api/detail.json?params" + this.$route.params.id)，他的意思就是给这个请求地址加一个参数，这个参数就是去路由中找到的 id 这个参数，这个时候我们打开页面，例如点击 id 是 002 的城市，到 Network 中看一下，他的请求地址就是 http://127.0.0.1:8080/api/detail.json?params002：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-942cca52c8cc5817.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+说明能够获取到 002 的 id 值，并发送 ajax 请求。上面这种方式我们直接将参数拼接到了路径后边，其实可以换一种方式，前面只写接口名，后面写一个对象，里边存放需要的参数：
+```
+axios.get("/api/detail.json",{
+    params : {
+        id : this.$route.params.id
+    }
+})
+```
+
+然后去调用 then 方法，去接收请求到的数据：
+
+Detail.vue
+```
+<script>
+// ...
+import axios from "axios"
+export default {
+    // ...
+    methods:{
+        getDeatilInfo(){
+            // axios.get("/api/detail.json?params" + this.$route.params.id);
+            // 推荐把参数 params 放到对象中去使用：
+            axios.get("/api/detail.json",{
+                params : {
+                    id : this.$route.params.id
+                }
+            }).then(this.getDEatilInfoSucc);
+        },
+        getDEatilInfoSucc(result){
+            console.log(result);
+        }
+    },
+    mounted(){
+        this.getDeatilInfo();
+    }
+};
+</script>
+```
+
+打开页面，可以看到，已经成功请求到了数据：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-42b0baa7ed4f35bb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+接下来，我们将请求到的数据做下处理，并将这些数据渲染到页面上。
+
+Detail.vue
+```
+<template>
+<div class="detail-content">
+    <detail-banner :sightName="sightName" :bannerImg="bannerImg" :gallaryImgs="gallaryImgs"></detail-banner>
+    <detail-header :sightName="sightName"></detail-header>
+    <div class="content">
+        <detail-list :categoryList="categoryList"></detail-list>
+    </div>
+</div>
+</template>
+
+<script>
+import DetailBanner from "./components/banner";
+import DetailHeader from "./components/header";
+import DetailList from "./components/list";
+import axios from "axios";
+export default {
+    name: "detail",
+    components: {
+        DetailBanner,
+        DetailHeader,
+        DetailList
+    },
+    data() {
+        return {
+            sightName: "",
+            bannerImg: "",
+            gallaryImgs: [],
+            categoryList: []
+        };
+    },
+    methods: {
+        getDeatilInfo() {
+            // axios.get("/api/detail.json?params" + this.$route.params.id)
+            // 推荐把参数 params 放到对象中去使用：
+            axios
+                .get("/api/detail.json", {
+                    params: {
+                        id: this.$route.params.id
+                    }
+                })
+                .then(this.getDEatilInfoSucc);
+        },
+        getDEatilInfoSucc(result) {
+            if (result.data) {
+                var data = result.data.data;
+                this.sightName = data.sightName;
+                this.bannerImg = data.bannerImg;
+                this.gallaryImgs = data.gallaryImgs;
+                this.categoryList = data.categoryList;
+            }
+        }
+    },
+    mounted() {
+        this.getDeatilInfo();
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+.detail-content {
+    height: 20rem;
+}
+</style>
+```
+
+Detail.vue 中我们通过 axios 请求到了数据，并将数据都给到了各个属性上去，然后再通过属性的方式将这些数据传递给子组件们，最后到各个子组件中通过 props 接收数据并渲染到页面上，banner.vue、
+header.vue、list.vue 这几个组件如何去接收数据并渲染我就不多说了。
+
+这个时候详情页的效果应该是这样的：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-2429af7e92f68eae.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+但是有一个问题，打开 Network，如果点击的是第一个城市，他会去请求 http://localhost:8080/api/detail.json?id=001，但是返回到首页，我们再点第二个城市，并没有发送新的请求，还是 id=001 的请求，刷新一下页面，才会去请求 id=2 的城市的信息，显然这是不符合逻辑的。导致出现这个问题的原因是什么呢？
+
+回顾一下 keep-alive，我们在 App.vue 中给 router-view 外层包裹了一个 keep-alive 标签，他是 Vue 自带的一个标签，意思就是我的路由的内容被加载一次后，我就把路由中的内容放到内存之中，下一次再进入这个路由的时候，不需要重新渲染这个组件，去重新执行钩子函数，只要去内存里把以前的内容拿出来就可以。我们之前做城市列表页的时候，加了 keep-alive，可以在首页和列表页切换的的时候，不用每次都去请求 index.json 和 list.json，但是在这里，每一个城市的信息内容都是不同的，所以这里讲一个 keep-alive 中的一个属性 exclude，让他等于组件的名字，例如：exclude="detail，意思是除了 detail 页面，其他页面都会被缓存。
+
+这个时候，如果点击的是第一个城市，他会去请求 http://localhost:8080/api/detail.json?id=001，返回到首页，我们再点第二个城市，就会去请求 id=2 的城市信息。
 
 

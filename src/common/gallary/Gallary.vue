@@ -21,9 +21,9 @@ export default {
     props:{
         imgs:{
             type : Array,
-            default(){
-                return imgs
-            }
+            // default(){
+            //     return imgs
+            // }
         }
     },
     data() {
