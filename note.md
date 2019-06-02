@@ -2924,3 +2924,68 @@ export default {
 ![](https://upload-images.jianshu.io/upload_images/9373308-a4dbbb2798005152.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
+
+
+
+### 七、在项目中加入基础动画
+
+当点击详情页的时候，会出现一个画廊，点击画廊，他又会消失，如果想给这一过程加一个动画效果，一个渐隐渐显的效果，该如何实现？回忆下一 [“Vue.js第4课-Vue中的动画特效（part01）”](https://www.jianshu.com/p/aaae38025876)中实现动画特效的方法。
+
+这里我们先在公共组件目录 common 下新建一个存放动画组件的目录 animation，然后在该目录下新建一个 fade.vue，子里边编写渐隐渐显的动画效果，这里我们使用插槽的方式来实现：
+
+fade.vue
+```
+<template>
+<transition>
+    <slot></slot>
+</transition>
+</template>
+
+<script>
+export default {
+    name: "fade"
+};
+</script>
+
+<style lang="stylus" scoped>
+.v-enter,
+.v-leave-to {
+    opacity: 0;
+}
+
+.v-enter-active,
+.v-leave-active {
+    transition: opacity 0.5s;
+}
+</style>
+```
+
+接下来去 detail/banner.vue 中引入并使用这个组件，因为我们使用的是 slot 插槽的形式，所以在 banner.vue 中直接将画廊组件 common-gallary 放到 fade 模板中就可以了，这样就相当于给画廊组件外层包了一个 transition，并给他加上了动画效果：
+
+detail/banner.vue
+```
+<template>
+<div>
+    <!-- ... -->
+    <fade>
+        <common-gallary :imgs="gallaryImgs" v-show="showGallary" @close="GalleryClose"></common-gallary>
+    </fade>
+</div>
+</template>
+
+<script>
+// ...
+import fade from "common/animation/fade";
+export default {
+    name: "DetailBanner",
+    components : {
+        fade
+    }
+    // ...
+};
+</script>
+```
+
+此时打开页面，当我们点击详情页的 banner 部分时，画廊会渐渐的显示出来，点击画廊部分，他会渐渐的消失，以上就完成了 banner 部分的一个简单的动画效果。
+
+最后记得提交代码并合并分支。

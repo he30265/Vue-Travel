@@ -14,17 +14,21 @@
             <div class="bt-tit">{{sightName}}</div>
         </div>
     </div>
-    <common-gallary :imgs="gallaryImgs" v-show="showGallary" @close="GalleryClose"></common-gallary>
+    <fade>
+        <common-gallary :imgs="gallaryImgs" v-show="showGallary" @close="GalleryClose"></common-gallary>
+    </fade>
 </div>
 
 </template>
 
 <script>
-import CommonGallary from "common/gallary/Gallary"
+import CommonGallary from "common/gallary/Gallary";
+import fade from "common/animation/fade";
 export default {
     name: "DetailBanner",
     components : {
-        CommonGallary
+        CommonGallary,
+        fade
     },
     props:{
         sightName:String,
