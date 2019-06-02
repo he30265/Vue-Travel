@@ -3,19 +3,19 @@
     <div class="rw_tit">猜你喜欢</div>
     <div class="rw_list">
         <div class="rl_li border-bottom" v-for="item of list" :key="item.id">
-            <a href class="a">
-          <div class="pic">
-            <img :src="item.imgUrl" alt class="img">
-          </div>
-          <div class="info">
-            <div class="tit">{{item.infoTit}}</div>
-            <div class="txt">{{item.infoTxt}}</div>
-            <div class="money">
-              <b class="b">¥</b>
-              <i class="i">{{item.infoMoney}}</i>起
-            </div>
-          </div>
-        </a>
+            <router-link href class="link" :to="'/detail/' + item.id">
+                <div class="pic">
+                    <img :src="item.imgUrl" alt class="img">
+                </div>
+                <div class="info">
+                    <div class="tit">{{item.infoTit}}</div>
+                    <div class="txt">{{item.infoTxt}}</div>
+                    <div class="money">
+                        <b class="b">¥</b>
+                        <i class="i">{{item.infoMoney}}</i>起
+                    </div>
+                </div>
+            </router-link>
         </div>
     </div>
     <div class="rw_more">
@@ -48,7 +48,7 @@ export default {
         .rl_li {
             padding: 0.2rem;
 
-            .a {
+            .link {
                 color: #333;
                 display: flex;
 
