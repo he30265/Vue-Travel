@@ -1,3 +1,4 @@
+
 <template>
     <div class="detail-content">
         <detail-banner></detail-banner>
