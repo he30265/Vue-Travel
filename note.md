@@ -1995,3 +1995,221 @@ export default {
 以上我们就完成了公用图片画廊组件拆分与功能的实现，最后记得提交代码并合并分支。
 
 
+
+### 三、实现 Header 渐隐渐显效果
+
+可以打开 [去哪网](http://touch.piao.qunar.com/touch/detail.htm?id=989946426&from=as_recommend_sight) 看一下城市的详情页，首先他的左上角定位了一个返回图标，当页面向下滑动过的时候，这个返回图标小时，会渐渐出现一个头部，和首页的头部样式一样，所以我们先来完成头部这两个部分的布局样式。
+
+首先在 details/components 目录下新建一个 header.vue 组件，并在 Details.vue 中引用并使用这个组件，然后编写 header.vue 组件的布局与样式。例：
+
+detail/header.vue
+```
+<template>
+<div class="detail-header">
+    <router-link class="header-abs" to="/">
+        <span class="iconfont">&#xe624;</span>
+    </router-link>
+    <div class="header-fix">
+        <div class="header-left">
+            <span class="iconfont">&#xe624;</span>
+        </div>
+        <div class="header-center">北京世界园艺博览会</div>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "DetailHeader"
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.detail-header {
+    .header-abs {
+        position: absolute;
+        top: .2rem;
+        left: .2rem;
+        width: 0.68rem;
+        height: 0.68rem;
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 50%;
+        text-align: center;
+        line-height: 0.68rem;
+        color #fff
+    }
+
+    .header-fix {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: $bgColor;
+        overflow: hidden;
+        color: #fff;
+        padding: 0.2rem;
+
+        .header-left {
+            position: absolute;
+            top: 0.2rem;
+            left: 0.2rem;
+        }
+
+        .header-center {
+            text-align: center;
+            margin: 0 0.2rem;
+        }
+    }
+}
+</style>
+```
+当前效果图：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-2df589225a8d4b3a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+注意，因为当前详情页内容不够长，不能下滑，所以给 Detail.vue 内容设置一个高度，让他能够向下滑动。
+
+头部的布局样式完成了，接下来就需要实现一些逻辑了。默认打开详情页的时候，导航条是不显示的，只显示返回按钮图标，当页面向下滑动的时候，返回图标隐藏，导航条渐渐显示出来，我么来实现一下这个效果。
+
+首先在 data 中定义一个变量 showAbs，默认为 true，然后通过 v-show 来决定哪个元素显示：
+
+```
+<template>
+<div class="detail-header">
+    <router-link class="header-abs" to="/" v-show="showAbs">
+        <span class="iconfont">&#xe624;</span>
+    </router-link>
+    <div class="header-fix" v-show="!showAbs">
+        <div class="header-left">
+            <span class="iconfont">&#xe624;</span>
+        </div>
+        <div class="header-center">北京世界园艺博览会</div>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "DetailHeader",
+    data(){
+        return {
+            showAbs: true
+        }
+    }
+};
+</script>
+```
+
+所以这个时候返回图标这个元素是显示的，header 部分不显示，当我们将页面向下滑，高度差不多是 60px 的时候，让返回图标隐藏，header 显示，所以这里要写一个滚动监听的函数，那就用到 avtivted 这个生命周期函数了。
+
+在 activted 中，我们给 window 添加一个滚动监听事件 handleScroll，然后在 methods 中编写这个事件方法，通过 document.documentElement.scroll 来获取页面向上滚动的高度，然后做判断，当这个高度大于 50 的时候，也就是差不多大于图标安努的高度时，图标按钮隐藏，header 部分显示，所以让 this.showAbs 为 false 就可以了，否则让他为 true，这样就实现了当页面的滚动高度大于 50 的时候，返回图标隐藏，header 显示。
+
+header.vue
+```
+<script>
+export default {
+    name: "DetailHeader",
+    data(){
+        return {
+            showAbs: true
+        }
+    },
+    methods:{
+        handleScroll(){
+            const top = document.documentElement.scrollTop;
+            if(top > 50){
+                this.showAbs = false;
+            }else{
+                this.showAbs = true;
+            }
+            console.log(top);
+        }
+    },
+    activated(){
+        window.addEventListener("scroll",this.handleScroll);
+    }
+};
+</script>
+```
+
+接下来就该实现渐隐渐显的动画效果了，在 if 判断中定义一个 opacity 变量，他等于 top/100，因为 top 值在页面滚动的时候是变化的，所以 opacity 也就是变化的了，然后做一个三元运算，当这个 opacity 大于 1 的时候，我就让他一直等于 1，也就是让他一直显示，否则的话，还是让他等于这个 opacity 变量，然后给 data 中的 opacityStyle 设置值，让他里边的 opacity 等于 opacity。
+
+header.vue
+```
+<script>
+export default {
+    name: "DetailHeader",
+    data(){
+        return {
+            showAbs: true,
+            opacitySty:{
+                opacity : 0
+            }
+        }
+    },
+    methods:{
+        handleScroll(){
+            const top = document.documentElement.scrollTop;
+            if(top>50){
+                this.showAbs = false;
+                let opacity = top / 100;
+                opacity = opacity > 1 ? 1 : opacity;
+                this.opacitySty.opacity = opacity;
+            }else{
+                this.showAbs = true
+            }
+        }
+    },
+    activated() {
+        window.addEventListener("scroll",this.handleScroll)
+    },
+};
+</script>
+```
+
+回到页面，向下滚动，可以看到导航出现了一个渐隐渐显的效果。最后记得给导航中的返回按钮也添加一个返回首页的路由。
+
+以上就实现了 Header 渐隐渐显效果。
+
+
+
+### 四、对全局事件的解绑
+
+先来回顾上一章，给 window 对象添加滚动监听事件这部分，我们在 handleScroll 中打印一些内容，例：
+
+detail/header.vue
+```
+methods:{
+    handleScroll(){
+        console.log("scroll");
+        // ...
+    }
+},
+activated(){
+    window.addEventListener("scroll",this.handleScroll);
+}
+```
+
+启动项目服务，打开页面，在详情页滚动页面的时候，可以看到控制台输出了 “scroll” 内容，这没有问题，但是，回到首页，在滚动页面的时候，控制台中也打印出了 “scroll” 内容，也就是说首页也执行了 handleScroll 这个方法，但是这个方法我们是写在 header.vue 中的，为什么首页也会有呢？
+
+因为之前我们都是用 @ 给元素绑定事件，而且是给当前组件中的元素绑定，他只作用于组件的内部，不会影响外部的组件，但是这里我们是给全局的 window 对象绑定的，所以会造成这种问题，这个滚动事件不仅对这个组件有效果，对其他的组件也产生了影响，那如何去处理这个问题呢？
+
+当我们对这个组件用了 keep-alive 的时候，这个组件会多出一个 activted 生命是周期函数，这一块内容可以回顾一下 [“Vue.js第7课-项目实战-城市列表开发（part04）”](https://www.jianshu.com/p/2a5d7f190ceb) 中的第十一章，activted 在每次页面展示的时候会执行，与之对应，他还提供给我们一个新的生命周期函数，叫做 deactivted，他是页面即将被隐藏，或者说页面即将被替换成新的页面的时候，这个组件的 deactivted 这个生命周期函数会被执行，我们在这个函数中将给 window 对象添加的滚动事件给移除掉。
+
+detail/header.vue
+```
+// ...
+activated(){
+    window.addEventListener("scroll",this.handleScroll);
+},
+deactivated(){
+    window.removeEventListener("scroll",this.handleScroll);
+}
+// ...
+```
+
+也就你页面展示的时候绑定 scroll 事件，页面隐藏的时候再去对这个 scroll 事件进行解绑。这个时候，回到页面，在详情页滚动的时候，可以看到打印出了 “scroll”，回到首页，滚动页面的时候，并没有打印出 “scroll”，说明并没有执行滚动时间，这样就解决了上一章中留下的 BUG。
+
+最后记得提交代码并合并分支。

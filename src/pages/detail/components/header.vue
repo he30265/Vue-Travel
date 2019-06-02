@@ -1,0 +1,89 @@
+<template>
+<div class="detail-header">
+    <router-link class="header-abs" to="/">
+        <span class="iconfont">&#xe624;</span>
+    </router-link>
+    <div class="header-fix" v-if="!showAbs" :style="opacitySty">
+        <router-link class="header-left" to="/">
+            <span class="iconfont">&#xe624;</span>
+        </router-link>
+        <div class="header-center">北京世界园艺博览会</div>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    name: "DetailHeader",
+    data(){
+        return {
+            showAbs: true,
+            opacitySty:{
+                opacity : 0
+            }
+        }
+    },
+    methods:{
+        handleScroll(){
+            console.log(1)
+            const top = document.documentElement.scrollTop;
+            if(top>50){
+                this.showAbs = false;
+                let opacity = top / 100;
+                opacity = opacity > 1 ? 1 : opacity;
+                this.opacitySty.opacity = opacity;
+            }else{
+                this.showAbs = true
+            }
+        }
+    },
+    activated() {
+        window.addEventListener("scroll",this.handleScroll)
+    },
+    deactivated(){
+        window.removeEventListener("scroll",this.handleScroll)
+    }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~style/varibles';
+
+.detail-header {
+    .header-abs {
+        position: absolute;
+        top: .2rem;
+        left: .2rem;
+        width: 0.68rem;
+        height: 0.68rem;
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 50%;
+        text-align: center;
+        line-height: 0.68rem;
+        color #fff
+    }
+
+    .header-fix {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: $bgColor;
+        overflow: hidden;
+        color: #fff;
+        padding: 0.2rem;
+
+        .header-left {
+            position: absolute;
+            top: 0.2rem;
+            left: 0.2rem;
+            color :#fff
+        }
+
+        .header-center {
+            text-align: center;
+            margin: 0 0.2rem;
+        }
+    }
+}
+</style>
