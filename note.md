@@ -3015,3 +3015,45 @@ pathRewrite: {
 但是这么写，其实是没有任何意义的，直接将它删除就可以了。此时 proxyTable 变得非常简单，只要你在开发服务器上请求 api 下面的地址，我都帮你转发到后台服务器上面。当改变了 config 目录下的配置文件的时候，需要重启前端项目服务。
 
 这个时候，打开页面，可以看到成功请求到后端接口的数据并渲染到页面上了。当然，在做真实的前后端联调的项目中，他不会这么简单，现在我们的前后端都是在我们本地，如果后端服务不在本地，而是在后端程序员的电脑上，或者是内网/外网的服务器，如果是这样的话，你的代理就不能写 localhost 了，可以去写一个内网的 ip 地址，或者外网域名，通过这种形式，我们就可以把 /api 这个地址的任何请求代理转发给任何一台后端服务器从而非常方便的实现前后端的联调。
+
+
+
+### Vue 项目真机测试
+
+这一章来看一下 Vue 项目如何进行真机测试。我们在通过 npm run dev 启动项目服务的时候，终端会显示出项目的服务地址，通过这个地址我们就可以访问项目了：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-762aabc1146859f6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+我再启动一个终端，执行 ifconfig（如果是 window 操作系统，命令就是 ipconfig），通过这个命令，我们可以获取到当前机器的 ip 地址：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-b625f0bdba4a9900.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+所以我电脑在内网里的 ip 地址就是 192.168.0.103，复制一下这个地址，然后在浏览器中输入一下 192.168.0.103，他指的也是我这台机器，所以 8080 端口和 localhost:8080 端口实际上指的地方都是一样的，正常访问 192.168.0.103:8080/ 也是可以打开项目的，但是现在浏览器提示无法建立链接，为了做一下确认，把 8080 端口换成 80（后端接口地址），本地的后端服务器是可以正常启动的，也就是说 ip 地址没问题，只是 8080 端口无法被外界访问，原因是我们前端的项目是通过 webpack-dev-server 启动的，webpack-dev-server 默认不支持通过 ip 的形式进行页面的问问，所以我们要对他默认的配置项做一个修改。
+
+打开项目根目录下的 package.json 文件，我们每次执行 npm run dev 的时候，实际上都是在运行这样一段话：
+
+package.json
+```
+"dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+```
+也就是帮我们启动一个 webpack-dev-server，如果想让这个 webpack-dev-server 能够通过 ip 地址被访问的话，我们需要在上面那行代码中加一端代码“--host 0.0.0.0”：
+
+package.json
+```
+"dev": "webpack-dev-server --host 0.0.0.0 --inline --progress --config build/webpack.dev.conf.js",
+```
+
+这样去修改一下配置项就可以了。重启一服务，这个时候，访问 192.168.0.103:8080/#/ 就没有问题了。可以通过 ip 地址访问网站之后呢，我们就可以让我们的手机直接在内网里通过这个地址访问该网站了。这样就可以做一个真机测试。
+
+通过测试，发现一个 BUG，在城市列表也，我滑动右侧字母表，页面也跟着滑动了，所以在代码里我们需要把这个 BUG 解决掉。打开 city/alphabet.vue 这个组件，给模板中的 touchstart 加一个修饰符 prevent：
+
+city/alphabet.vue
+```
+<div class="li" :ref="item" v-for="item of letters" :key="item" @touchstart.prevent="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd" @click="handleAlpClick">{{item}}</div>
+```
+
+它是一个事件修饰符，可以阻止 touchstart 的默认行为，当阻止掉他的默认行为的时候，滚动字母表的时候，页面就不会跟着上下拖动了，回到手机上，可以看到没有任何问题了。
+
+通过基部测试，我们就实现了 Vue 项目的真机测试，但是因为手机的机型不太一样，如果是一些低版本的安卓手机，可能会出现在手机上访问这个网页，是白屏的效果，他可能有两种原因产生，一种是你的手机删可能默认不支持 Promise，解决这个问题，我们需要通过 npm 安装一个第三方的包，babel-polyfill，这个包他会判断，如果浏览器没有 Promise，会自动帮我们去添加这些 ES6 的新特性。
+
+安装好之后，进入 main.js 入口文件，去引入 babel-polyfill 这个包，这样这个项目在所有浏览器上都支持 Promise 了，一部分手机上展示有白屏的问题也就得到解决。如果还有一部分手机依然有这样的问题，这种情况一般来说不是代码的问题，而是 webpack-dev-server 的问题，下一章我们来讲解 webpack 的打包上线，可以把项目打包好了之后，放到真正的开发环境或者线上环境，去做一个测试，当代码上传到开发环境的服务器或者线上的服务器环境的时候，白屏问题就不会出现了。

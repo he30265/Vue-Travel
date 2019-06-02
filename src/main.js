@@ -10,7 +10,8 @@ import "style/border.css";
 import "style/iconfont.css";
 import VueAwesomeSwiper from "vue-awesome-swiper";
 import "swiper/dist/css/swiper.css";
-import store from "./store/"
+import store from "./store/";
+import "babel-polyfill";
 
 Vue.config.productionTip = false;
 

@@ -1,7 +1,7 @@
 <template>
 <div class="alp_list">
     <div class="ul">
-        <div class="li" :ref="item" v-for="item of letters" :key="item" @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd" @click="handleAlpClick">{{item}}</div>
+        <div class="li" :ref="item" v-for="item of letters" :key="item" @touchstart.prevent="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd" @click="handleAlpClick">{{item}}</div>
     </div>
 </div>
 </template>
