@@ -2783,6 +2783,8 @@ header.vue、list.vue 这几个组件如何去接收数据并渲染我就不多�
 
 这个时候，如果点击的是第一个城市，他会去请求 http://localhost:8080/api/detail.json?id=001，返回到首页，我们再点第二个城市，就会去请求 id=2 的城市信息。
 
+当我们使用了 exclude，页面就会出现一个新的问题，activated 和 deactivated 这两个钩子函数就不执行了，监听不到滚动事件，所以就导致 header 部分渐隐渐显的效果也没有了，可以去页面上看一下。这是因为使用  keep-alive 的时候，这个组件会多出 activted 和 deactivated 两个生命是周期函数，使用了 exclude，让 detail 页面不被缓存，也就没有了这两个生命周期函数。这个时候我们将两个生命周期函数换为 created 和 decreated 就可以了，里面的方法不变。
+
 这样页面就没有问题了么？回到页面上，我们这样去试一下：将首页往上滚动一部分，然后去点击城市，进入详情页，发现详情页也被向上滚动了同样的高度，也就是这个滚动多个页面之间会互相影响，这么解决这个 BUG 呢？打开 Vue 官网，找到 vue-router 下的滚动行为，官网给我们提供了一个方法，我们将这个方法添加到 router/index.js 中：
 
 router/index.js

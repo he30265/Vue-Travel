@@ -23,12 +23,11 @@ export default {
             }
         };
     },
-    props:{
-        sightName:String
+    props: {
+        sightName: String
     },
     methods: {
         handleScroll() {
-            // console.log("scroll");
             const top = document.documentElement.scrollTop;
             if (top > 50) {
                 let opacity = top / 120;
@@ -42,11 +41,18 @@ export default {
             }
         }
     },
-    activated() {
+    // activated() {
+    //     window.addEventListener("scroll", this.handleScroll);
+    // },
+    // deactivated() {
+    //     window.removeEventListener("scroll", this.handleScroll);
+    // },
+    // 因为 detail 页面被设置为不缓存，所以 activated 和 deactivated 也不会被执行。
+    created() {
         window.addEventListener("scroll", this.handleScroll);
     },
-    deactivated() {
-        window.removeEventListener("scroll", this.handleScroll);
+    decreated() {
+        window.addEventListener("scroll", this.handleScroll);
     }
 };
 </script>
