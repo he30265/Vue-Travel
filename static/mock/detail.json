@@ -7,13 +7,7 @@
         "categoryList": [{
             "title": "非指定日上午场票",
             "children": [{
-                "title": "[上午场]成人票（早定优惠）",
-                "children":[{
-                    "title":"第三级"
-                },{
-                    "title":"第三级"
-                }]
-
+                "title": "[上午场]成人票（早定优惠）"
             }, {
                 "title": "[上午场]老人票"
             }]

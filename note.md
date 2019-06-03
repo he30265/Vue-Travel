@@ -1002,11 +1002,16 @@ details.json
 }
 ```
 
-然后到 Detail.vue 中通过 axios 获取 detail.json 中的数据，在请求地址这一块需要注意一下，当访问 id 是 001 的景点的时候，需要获取的是 001 这个景点对应的数据，访问 002 获取的就是 002 这个景点对应的数据，所以每一次请求都把这个 id 带给后端，这个 id 是动态路由的一个参数（回忆一下动态路由），如何获得动态路由的参数呢？
+然后到 Detail.vue 中通过 axios 获取 detail.json 中的数据，在请求地址这一块需要注意一下，当访问 id 是 001 的景点的时候，应该获取的是 001 这个景点对应的数据，访问 002 获取的就是 002 这个景点对应的数据，所以每一次请求都把这个 id 带给后端，这个 id 是动态路由的一个参数，回忆一下[“Vue.js第8课-项目实战-旅游网站详情页面开发（part01）”](https://www.jianshu.com/p/38c62608d16c)中的动态路由，那里我们设置了点击不同的城市，地址会根据 id 的不同，而变得不一样。这里，在我们通过 Ajax 向后端请求数据的时候，也需要实现因 id 不同，请求地址也不同的逻辑，所以我们就要在 axios 请求的地址后加一个动态路由的参数，如何获得动态路由的参数呢？
 
-首先看一下路由的配置，打开 router 目录下的 index.js，我们给 detail 这个路径后面加了一个 :id，定义了动态路由，会把对应的 id 存在对应的 id 变量里，那么在请求地址这一块就可以这样去写：axios.get("/api/detail.json?params" + this.$route.params.id)，他的意思就是给这个请求地址加一个参数，这个参数就是去路由中找到的 id 这个参数，这个时候我们打开页面，例如点击 id 是 001 的城市，到 Network 中看一下，他的请求地址就是 http://127.0.0.1:8080/api/detail.json?params002：
+首先看一下路由的配置，打开 router 目录下的 index.js，我们给 detail 这个路径后面加了一个 :id，定义了动态路由，会把对应的 id 存在对应的 id 变量里，那么在请求地址这一块就可以这样去写：
+```
+axios.get("/api/detail.json?params" + this.$route.params.id)
+```
 
-![](https://upload-images.jianshu.io/upload_images/9373308-75a8085440654814.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+他的意思就是给这个请求地址加一个参数，这个参数就是去路由中找到的 id 这个参数，这个时候我们打开页面，例如点击 id 是 001 的城市，到 Network 中看一下，他的请求地址后边跟的就是 detail.json?id=001：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-451ed61d748ebc2a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 说明能够获取到 001 的 id 值，并发送 ajax 请求。上面这种方式我们直接将参数拼接到了路径后边，其实可以换一种方式，前面只写接口名，后面写一个对象，里边存放需要的参数：
 ```
@@ -1049,7 +1054,7 @@ export default {
 
 打开页面，可以看到，已经成功请求到了数据：
 
-![](https://upload-images.jianshu.io/upload_images/9373308-42b0baa7ed4f35bb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](https://upload-images.jianshu.io/upload_images/9373308-a66a61ab7bbb2730.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 接下来，我们将请求到的数据做下处理，并将这些数据渲染到页面上。
 
@@ -1125,15 +1130,19 @@ header.vue、list.vue 这几个组件如何去接收数据并渲染我就不多�
 
 这个时候详情页的效果应该是这样的：
 
-![](https://upload-images.jianshu.io/upload_images/9373308-3143a870049e07e2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](https://upload-images.jianshu.io/upload_images/9373308-570bd3fa328556bf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-但是有一个问题，打开 Network，如果点击的是第一个城市，他会去请求 http://localhost:8080/api/detail.json?id=001，但是返回到首页，我们再点第二个城市，并没有发送新的请求，还是 id=001 的请求，刷新一下页面，才会去请求 id=2 的城市的信息，显然这是不符合逻辑的。导致出现这个问题的原因是什么呢？
+但是有一个问题，打开 Network，如果点击的是第一个城市，他会去请求:
+```
+http://localhost:8080/api/detail.json?id=001
+```
+这个路径下的数据，但是返回到首页，我们再点第二个城市，并没有发送新的请求，还是 id=001 的请求，刷新一下页面，才会去请求 id=2 的城市的信息，显然这是不符合逻辑的。导致出现这个问题的原因是什么呢？
 
-回顾一下 keep-alive，我们在 App.vue 中给 router-view 外层包裹了一个 keep-alive 标签，他是 Vue 自带的一个标签，意思就是我的路由的内容被加载一次后，我就把路由中的内容放到内存之中，下一次再进入这个路由的时候，不需要重新渲染这个组件，去重新执行钩子函数，只要去内存里把以前的内容拿出来就可以。我们之前做城市列表页的时候，加了 keep-alive，可以在首页和列表页切换的的时候，不用每次都去请求 index.json 和 list.json，但是在这里，每一个城市的信息内容都是不同的，所以这里讲一个 keep-alive 中的一个属性 exclude，让他等于组件的名字，例如：exclude="detail，意思是除了 detail 页面，其他页面都会被缓存。
+回顾一下 keep-alive，我们在 App.vue 中给 router-view 外层包裹了一个 keep-alive 标签，他是 Vue 自带的一个标签，意思就是我的路由的内容被加载一次后，我就把路由中的内容放到内存之中，下一次再进入这个路由的时候，不需要重新渲染这个组件，去重新执行钩子函数，只要去内存里把以前的内容拿出来就可以。我们之前做城市列表页的时候，加了 keep-alive，可以在首页和列表页切换的的时候，不用每次都去请求 index.json 和 list.json，但是在这里，每一个城市的信息内容都是不同的，所以这里讲一个 keep-alive 中的一个属性 exclude，给他添加不想被缓存的页面组件的名字，例如：exclude="detail，意思是除了 detail 页面，其他页面都会被缓存。
 
-这个时候，如果点击的是第一个城市，他会去请求 http://localhost:8080/api/detail.json?id=001，返回到首页，我们再点第二个城市，就会去请求 id=2 的城市信息。
+这个时候，如果点击的是第一个城市，他会去请求 id=1 的城市信息数据，返回到首页，我们再点第二个城市，就会去请求 id=2 的城市信息。
 
-这样页面就没有问题了么？回到页面上，我们这样去试一下：将首页往上滚动一部分，然后去点击城市，进入详情页，发现详情页也被向上滚动了同样的高度，也就是这个滚动多个页面之间会互相影响，这么解决这个 BUG 呢？打开 Vue 官网，找到 vue-router 下的滚动行为，官网给我们提供了一个方法，我们将这个方法添加到 router/index.js 中：
+这样页面就没有问题了么？回到页面上，我们这样去试一下：将首页往上滚动一部分，然后去点击城市，进入详情页，发现详情页也被向上滚动了同样的高度，也就是这个滚动在多个页面之间会互相影响，怎么解决这个 BUG 呢？打开 Vue 官网，找到 vue-router 下的滚动行为，官网给我们提供了一个方法 scrollBehavior，我们将这个方法添加到 router/index.js 中：
 
 router/index.js
 ```
@@ -1167,6 +1176,8 @@ export default new Router({
 });
 ```
 这样就解决了滚动一个页面，影响多个页面的问题。scrollBehavior 这个方法的意思就是，我滚动了某个页面，当打开新的页面的时候，将新页面的位置定位到 x 轴和 y 轴都为 0 的位置。
+
+*我还发现了一个问题，就是代码写到这里，我在详情页滚动页面的时候，头部显示不出来了，原本是有一个渐隐渐现的效果的，现在压根就不显示了，经过苦苦的寻找，找到了原因，是因为 activated 这个生命周期函数不执行了，原因是我在上边用了 exclude，取消了对详情页的缓存，所以详情页中使用的组件也不会被缓存。之前说过，当你使用 keeo-alive 的时候，组件中会多出一个生命周期函数 activted，既然这里设置了让 keep-alive 不包括详情页，就不会多出 activted 这个生命周期函数，那么滚动事件也不会被监听。这里换成声明周期函数 created 就可以了，在 created 中添加监听事件，与之对应的在 decreated 中移除监听事件（因为滚动会影响其他组件，所以在打开新页的时候要移除滚动事件，与之前讲的“对全局事件的解绑”中的 deactivated 意思是一样的）。*
 
 以上就完成了使用 Ajax 获取动态数据，记得提交代码并合并分支。
 

@@ -48,6 +48,7 @@ export default {
                 this.gallaryImgs = data.gallaryImgs;
                 this.categoryList = data.categoryList;
             }
+            console.log(result)
         }
     },
     mounted() {
