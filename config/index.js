@@ -12,11 +12,11 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
-        // target: 'http://localhost:8080',  // 后端提供的接口地址
-        target: 'http://localhost:8082',
+        target: 'http://localhost:8080',  // 后端提供的接口地址
+        // target: 'http://localhost:8082',
         // target:'http://127.0.0.1:3000',
         pathRewrite: {
-          // '^/api': '/static/mock/',
+          '^/api': '/static/mock/',
           // '^/api': 'http://localhost:8082/api/',
         }
       }
@@ -60,7 +60,7 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: './',
 
     /**
      * Source Maps
