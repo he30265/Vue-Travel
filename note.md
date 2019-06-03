@@ -1354,24 +1354,67 @@ export default {
 
 ### 一、Vue 项目的接口联调
 
-之前我们使用的数据都不是后端返回的真实数据，而是我们自己通过接口 mock 模拟的加数据，当我们开发到这样一个节点，前段的代码已经编写完毕了，后端的接口也已经写好的时候，我们就需要把前端模拟的数据删掉，去尝试使用后端提供的数据进行一个前后端的一个调试，这个过程就称为前后端的联调。在 Vue 中如何进行接口的联调？我们来看一下。
+之前我们使用的数据都不是后端返回的真实数据，而是我们自己通过接口 mock 模拟的假数据，当我们开发到这样一个节点，如果前端的代码已经编写完毕了，后端的接口也已经写好的时候，我们就需要把前端模拟的数据删掉，去尝试使用后端提供的数据进行一个前后端的一个调试，这个过程就称为前后端的联调。在 Vue 中如何进行接口的联调？我们来看一下。
 
 在之前写代码的时候，我们在 static 目录下，会有一个 mock 文件夹，里面写了一些 json 文件，当我们的代码做联调的时候，这些 mock 的数据就没用了，我们要把这些 mock 数据切换为后端真实提供给我们的数据。
 
-**启动一个后端服务器，去请求后端服务器的数据**
+我用 Node.js 启动了一个后端服务器，将之前 mock 模拟的数据放到 Node 服务器上并简单地编写了接口给前端调用，来实模拟测试前后端项目的联调。
 
-例：localhost/api/index.json
+如何用 Node.js 编写接口可以参考我的这篇文章 [“用 Node.js 编写 RESTful API 接口给前端调用”](https://www.jianshu.com/p/dbec0680aed9)，具体怎么编码我就不详细说了，可以去我的 GitHub 仓库[“Vue-Travel-Server”](https://github.com/he30265/Vue-Travel-Server.git)将文件下载下来，安装依赖包并启动，即可使用我编写好的接口。
 
-把 mock 删了，意思是我联调的时候不希望访问我本地的数据，而是去访问后端服务器的数据。打开 config/index.js，在[“Vue.js第6课-项目实战-首页开发（part03）”](https://www.jianshu.com/p/24d039183dc0)中讲过一个 proxy 代理的功能，我们将 /api 开头的请求替换成了本地的 /static/mock/ 下的数据，也就是将请求转发到前端 8080 这个服务器下，现在我要把他转发到后端的服务器上，我们将 target 中的地址换为后端服务器的地址，在 pathRewrite 中，将 /api 的地址映射到服务器的 api 的路径下，而不是我本地的 /static/mock/ 路径，例如：
+用 Node.js 编写好数据接口后，我们可以测试一下，启动服务，访问以下三个地址：
 ```
-pathRewrite: {
-    '^/api': '/api',
-}
+http://localhost:8082/api/index.json
+http://localhost:8082/api/city.json
+http://localhost:8082/api/detail.json
 ```
 
-但是这么写，其实是没有任何意义的，直接将它删除就可以了。此时 proxyTable 变得非常简单，只要你在开发服务器上请求 api 下面的地址，我都帮你转发到后台服务器上面。当改变了 config 目录下的配置文件的时候，需要重启前端项目服务。
+![](https://upload-images.jianshu.io/upload_images/9373308-46ba3e66e79f819f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-这个时候，打开页面，可以看到成功请求到后端接口的数据并渲染到页面上了。当然，在做真实的前后端联调的项目中，他不会这么简单，现在我们的前后端都是在我们本地，如果后端服务不在本地，而是在后端程序员的电脑上，或者是内网/外网的服务器，如果是这样的话，你的代理就不能写 localhost 了，可以去写一个内网的 ip 地址，或者外网域名，通过这种形式，我们就可以把 /api 这个地址的任何请求代理转发给任何一台后端服务器从而非常方便的实现前后端的联调。
+看到数据可以请求成功，那就回到我们的 Vue 项目中，试用一下这三个接口，把 mock 删了，意思是我联调的时候不希望访问我本地的数据，而是去访问后端服务器的数据。打开 config/index.js，在[“Vue.js第6课-项目实战-首页开发（part03）”](https://www.jianshu.com/p/24d039183dc0)中讲过一个 proxy 代理的功能，之前我们将 /api 开头的请求替换成了本地的 /static/mock/ 下的数据，也就是将请求转发到前端 8080 这个服务器下，现在我要把他转发到后端的服务器上，我们将 target 中的地址换为后端服务器的地址（上面我在 Node.js 中设置的服务器端口号为 8082），在 pathRewrite 中，将 /api 的地址映射到服务器的 api 的路径下，而不是我本地的 /static/mock/ 路径：
+
+config/index.js
+```
+proxyTable: {
+    '/api': {
+        target: 'http://localhost:8082', // 后端提供的接口地址
+        pathRewrite: {
+            '^/api': 'http://localhost:8082/api/',
+        }
+    }
+},
+```
+
+这个时候，回到页面，我们可以看到 Node.js 提供的接口数据可以正常请求到，页面渲染也没有任何问题：
+
+![](https://upload-images.jianshu.io/upload_images/9373308-67e3e747375c5ea4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+但是在 pathRewrite 中这么写，其实是没有任何意义的，直接将 pathRewrite 删除就可以了。此时 proxyTable 变得非常简单，只要你在开发服务器上请求 api 下面的地址，我都帮你转发到后台服务器上面。当改变了 config 目录下的配置文件的时候，需要重启前端项目服务。
+
+这个时候，打开页面，可以看到成功请求到后端接口的数据并渲染到页面上了。当然，现在我们的前后端都是在我们本地，在做真实的前后端联调的项目中，如果后端服务不在本地，而是在后端程序员的电脑上，或者是内网/外网的服务器，如果是这样的话，你的代理就不能写 localhost 了，可以去写一个内网的 ip 地址，或者外网域名，通过这种形式，我们就可以把 /api 这个地址的任何请求代理转发给任何一台后端服务器从而非常方便的实现前后端的联调。
+
+我们修改一下后端服务的主机名和端口号来做个测试，在 Node.js 服务器下这样修改：
+
+app.js
+```
+const hostname = '127.0.0.1';
+const port = 3000;
+const server = app.listen(port,hostname, () => {
+  console.log(`服务器运行在 http://${hostname}:${port}`);
+});
+```
+
+然后打开 Vue项目的 config/index.js，这样修改就可以了。
+```
+proxyTable: {
+    '/api': {
+        target:'http://127.0.0.1:3000',
+        pathRewrite: {}
+    }
+},
+```
+
+回到页面上，可以看到数据请求依然没有任何问题。以上就完成了 Vue 项目的接口联调。
 
 
 
