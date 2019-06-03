@@ -1472,3 +1472,20 @@ city/alphabet.vue
 ![](https://upload-images.jianshu.io/upload_images/9373308-15068de3878e9112.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 下一步，我会将 dist 目录里的内容给到后端的开发人员，后端会把这个代码放到服务器上，然后和后端代码一起上线。这样就完成了最简单的上线。
+
+
+
+## 在 Vue 项目中使用 LeanClude
+
+首先通过 npm 安装 SDK：
+
+```
+# 存储服务（包括推送）
+$ npm install leancloud-storage --save
+#  即时通讯服务
+$ npm install leancloud-realtime --save
+```
+
+![](https://upload-images.jianshu.io/upload_images/9373308-6c18aad65acc8784.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+然后在代码中通过 require 获得 SDK 的引用：

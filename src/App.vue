@@ -8,8 +8,12 @@
 </template>
 
 <script>
+var AV = require('leancloud-storage');
 export default {
-    name: 'App'
+    name: 'App',
+    mounted(){
+        console.log(AV);
+    }
 }
 </script>
 

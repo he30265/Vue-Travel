@@ -19,6 +19,11 @@ fastClick.attach(document.body);
 
 Vue.use(VueAwesomeSwiper /* { default global options } */);
 
+var AV = require('leancloud-storage');
+AV.init("V7lzAyxGxYVEhMYUXqw1M54v-gzGzoHsz", "0iEPtcsAqGyypYcLqy71G0ul");
+
+console.log(AV)
+
 /* eslint-disable no-new */
 new Vue({
     el: "#app",
