@@ -12,10 +12,10 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
-        target: 'http://localhost:8080',  // 后端提供的接口地址
+        // target: 'http://localhost:8080',  // 后端提供的接口地址
         // target: 'http://localhost:8082',
         // target:'http://127.0.0.1:3000',
-        // target: 'http://39.107.232.63',
+        // target: 'http://39.107.232.63', // 部署到服务器上
         pathRewrite: {
           '^/api': '/static/mock/',
           // '^/api': 'http://localhost:8082/api/',

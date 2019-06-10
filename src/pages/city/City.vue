@@ -30,7 +30,9 @@ export default {
     },
     methods: {
         getCityInfo() {
-            axios.get("/api/city.json").then(this.getCitySuccess);
+            // axios.get("/api/city.json").then(this.getCitySuccess);
+            // 不做代理
+            axios.get("../../../static/mock/city.json").then(this.getCitySuccess);
         },
         getCitySuccess(result) {
             if (result.data.ret && result.data.data) {

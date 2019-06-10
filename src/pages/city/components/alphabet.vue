@@ -70,7 +70,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    line-height: 0.44rem;
+    line-height: 0.34rem;
 
     .ul {
         .li {

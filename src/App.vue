@@ -12,7 +12,7 @@ var AV = require('leancloud-storage');
 export default {
     name: 'App',
     mounted(){
-        console.log(AV);
+        // console.log(AV);
     }
 }
 </script>
