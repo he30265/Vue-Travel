@@ -2,16 +2,16 @@
 <div class="rec_wrap">
     <div class="rw_tit">周末去哪儿</div>
     <div class="rw_list">
-        <div class="rl_li" v-for="item of list" :key="item.id">
-            <a href class="a">
-          <div class="pic">
-            <img :src="item.imgUrl" alt class="img">
-          </div>
-          <div class="info">
-            <div class="tit">{{item.infoTit}}</div>
-            <div class="txt">{{item.infoTxt}}</div>
-          </div>
-        </a>
+        <div class="rl_li" >
+            <router-link :to="'/detail/' + item.id" class="a" v-for="item of list" :key="item.id">
+                <div class="pic">
+                    <img :src="item.imgUrl" alt class="img">
+                </div>
+                <div class="info">
+                    <div class="tit">{{item.infoTit}}</div>
+                    <div class="txt">{{item.infoTxt}}</div>
+                </div>
+            </router-link>
         </div>
     </div>
 </div>
