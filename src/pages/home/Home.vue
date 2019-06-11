@@ -39,10 +39,15 @@ export default {
         ...mapState(['city'])
     },
     methods: {
+        // getHomeInfo() {
+        //     axios.get("/api/index.json?city=" + this.city).then(this.getHomeInfoSucc);
+        // },
+        // 改写本地数据
         getHomeInfo() {
-            axios.get("/api/index.json?city=" + this.city).then(this.getHomeInfoSucc);
+            axios.get("../../../static/mock/index.json?city=" + this.city).then(this.getHomeInfoSucc);
         },
         getHomeInfoSucc(result) {
+            console.log(result)
             result = result.data;
             if (result.ret && result.data) {
                 const data = result.data;

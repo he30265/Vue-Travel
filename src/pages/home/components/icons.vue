@@ -4,10 +4,10 @@
       <swiper-slide v-for="(page,index) of pages" :key="index">
         <ul class="ul">
           <li class="li" v-for="item of page" :key="item.id">
-            <a href class="a">
+            <div class="a">
               <img :src="item.imgSrc" alt class="ico">
               <span class="txt">{{item.txt}}</span>
-            </a>
+            </div>
           </li>
         </ul>
       </swiper-slide>

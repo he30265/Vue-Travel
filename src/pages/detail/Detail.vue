@@ -32,13 +32,20 @@ export default {
         getDeatilInfo() {
             // axios.get("/api/detail.json?params" + this.$route.params.id)
             // 推荐把参数 params 放到对象中去使用：
-            axios
-                .get("/api/detail.json", {
+            // axios.get("/api/detail.json", {
+            //         params: {
+            //             id: this.$route.params.id
+            //         }
+            //     })
+            //     .then(this.getDEatilInfoSucc);
+            // 不做代理
+            axios.get("../../../static/mock/detail.json", {
                     params: {
                         id: this.$route.params.id
                     }
                 })
                 .then(this.getDEatilInfoSucc);
+                
         },
         getDEatilInfoSucc(result) {
             if (result.data) {
@@ -58,7 +65,5 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.detail-content {
-    height: 20rem;
-}
+
 </style>
