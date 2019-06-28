@@ -7,6 +7,7 @@ import Detail from "@/pages/detail/Detail";
 Vue.use(Router);
 
 export default new Router({
+    base: '/VueTravel/',
     routes: [
         {
             path: "/",
