@@ -29,10 +29,14 @@ export default {
         };
     },
     methods: {
+        // getCityInfo() {
+        //     // axios.get("/api/city.json").then(this.getCitySuccess);
+        //     // 不做代理
+        //     axios.get("../../../static/mock/city.json").then(this.getCitySuccess);
+        // },
+        // easy-mock 数据
         getCityInfo() {
-            // axios.get("/api/city.json").then(this.getCitySuccess);
-            // 不做代理
-            axios.get("../../../static/mock/city.json").then(this.getCitySuccess);
+            axios.get("https://www.easy-mock.com/mock/5cf5d52cdf6e47464f12bc5f/api/city.json").then(this.getCitySuccess);
         },
         getCitySuccess(result) {
             if (result.data.ret && result.data.data) {

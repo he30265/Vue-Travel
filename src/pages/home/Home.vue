@@ -43,9 +43,14 @@ export default {
         //     axios.get("/api/index.json?city=" + this.city).then(this.getHomeInfoSucc);
         // },
         // 改写本地数据
+        // getHomeInfo() {
+        //     axios.get("../../../static/mock/index.json?city=" + this.city).then(this.getHomeInfoSucc);
+        // },
+        // easy-mock 数据
         getHomeInfo() {
-            axios.get("../../../static/mock/index.json?city=" + this.city).then(this.getHomeInfoSucc);
+            axios.get("https://www.easy-mock.com/mock/5cf5d52cdf6e47464f12bc5f/api/index.json#!method=get?city=" + this.city).then(this.getHomeInfoSucc);
         },
+
         getHomeInfoSucc(result) {
             console.log(result)
             result = result.data;

@@ -39,13 +39,21 @@ export default {
             //     })
             //     .then(this.getDEatilInfoSucc);
             // 不做代理
-            axios.get("../../../static/mock/detail.json", {
+            // axios.get("../../../static/mock/detail.json", {
+            //         params: {
+            //             id: this.$route.params.id
+            //         }
+            //     })
+            //     .then(this.getDEatilInfoSucc);
+
+            // easy-mock 数据
+            axios.get("https://www.easy-mock.com/mock/5cf5d52cdf6e47464f12bc5f/api/detail.json", {
                     params: {
                         id: this.$route.params.id
                     }
                 })
                 .then(this.getDEatilInfoSucc);
-                
+
         },
         getDEatilInfoSucc(result) {
             if (result.data) {
@@ -62,6 +70,10 @@ export default {
         this.getDeatilInfo();
     }
 };
+
+
+
+
 </script>
 
 <style lang="stylus" scoped>
